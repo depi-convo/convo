@@ -53,9 +53,15 @@ const Chatbox = ({ contact }) => {
     }
   };
 
+  // useEffect(() => {
+  //   if (scrollRef.current) {
+  //     scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  //   }
+  // }, [messages]);
+
   useEffect(() => {
     if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [messages]);
 
@@ -86,39 +92,44 @@ const Chatbox = ({ contact }) => {
       </div>
 
       {/* Chatbox */}
-      <ScrollArea className="flex-1 p-4 space-y-2">
-        <div ref={scrollRef}>
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={cn(
-                "flex flex-col",
-                message.sender === "user" ? "items-end" : "items-start",
-              )}
-            >
+      <div className="h-[700px] w-full">
+        <ScrollArea className="h-full w-full">
+          <div className="p-4 space-y-2">
+            {messages.map((message, index) => (
               <div
+                key={index}
                 className={cn(
-                  "p-2 rounded-lg max-w-[70%]",
-                  message.sender === "user" ? "bg-blue-100" : "bg-gray-100",
+                  "flex flex-col",
+                  message.sender === "user" ? "items-end" : "items-start",
                 )}
               >
-                {message.text}
-                <div className="text-xs text-gray-500 mt-1 flex items-center justify-end">
-                  {formatTime(message.timestamp)}
-                  {message.sender === "user" && (
-                    <span className="ml-2">
-                      {message.read ? "read" : "delivered"}
-                    </span>
+                <div
+                  className={cn(
+                    "p-2 rounded-lg max-w-[70%]",
+                    message.sender === "user" ? "bg-blue-100" : "bg-gray-100",
                   )}
+                >
+                  {message.text}
+                  <div
+                    className={`text-xs text-gray-500 mt-1 flex items-center justify-end}`}
+                  >
+                    {formatTime(message.timestamp)}
+                    {message.sender === "user" && (
+                      <span className="ml-2">
+                        {message.read ? "read" : "delivered"}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                <p className="text-xs text-gray-400 mt-1">
+                  {formatDate(message.timestamp)}
+                </p>
               </div>
-              <p className="text-xs text-gray-400 mt-1">
-                {formatDate(message.timestamp)}
-              </p>
-            </div>
-          ))}
-        </div>
-      </ScrollArea>
+            ))}
+            <div ref={scrollRef} />
+          </div>
+        </ScrollArea>
+      </div>
 
       {/* Input box */}
       <div className="p-4 border-t flex space-x-2">
