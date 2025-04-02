@@ -6,9 +6,9 @@ import Signup from "@/pages/Signup";
 import Navigation from "@/components/Navbar";
 import Chatbox from "./components/Chatbox";
 
-const myContact = {
+const fakeContact = {
   name: "Alice Smith",
-  profilePic: "URL_TO_PROFILE_PICTURE", // Replace with a real URL
+  profilePic: "https://i.pravatar.cc/64",
   isActive: true,
 };
 
@@ -21,7 +21,7 @@ function App() {
           <div className="mt-8 bg-white rounded-lg shadow p-6">
             <Routes>
               <Route path="/" />
-              <Route path="/chat" element={<Chatbox contact={myContact} />} />
+              <Route path="/chat" element={<Chatbox contact={fakeContact} />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/signin" element={<Signin />} />
