@@ -19,9 +19,9 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <Navigation />
           <div className="mt-8 bg-white rounded-lg shadow p-6">
-            <Chatbox contact={myContact} />
             <Routes>
               <Route path="/" />
+              <Route path="/chat" element={<Chatbox contact={myContact} />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/signin" element={<Signin />} />
