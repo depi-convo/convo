@@ -1,0 +1,44 @@
+name: Dev CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  dev:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Bun
+        run: |
+          curl -fsSL https://bun.sh/install | bash
+          echo "$HOME/.bun/bin" >> $GITHUB_PATH
+          bun --version
+
+      - name: Setup and run Frontend Dev
+        run: |
+          cd frontend
+          bun install
+          # Start the Vite dev server in the background
+          bun run dev
+      
+      - name: Setup and run Backend Dev
+        run: |
+          cd backend
+          bun install
+          # Start the Express dev server in the background
+          bun run dev
+      
+      - name: Wait and check servers
+        run: |
+          sleep 10
+          # Check if the Vite server is up (default port 5173)
+          curl -I http://localhost:5173 || echo "Frontend server not responding"
+          # Check if the Express server is up (default port 3000)
+          curl -I http://localhost:3000 || echo "Backend server not responding"
