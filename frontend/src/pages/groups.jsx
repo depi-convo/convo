@@ -1,16 +1,15 @@
 
-
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/sidebar"
 import { FaBars, FaMoon, FaSun, FaHome, FaUser, FaUsers, FaSignOutAlt, FaKey, FaBell } from "react-icons/fa"
 
 
-const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
+const groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [activePage, setActivePage] = useState("profile")
-  const [activeTab, setActiveTab] = useState("personal")
+  const [activePage, setActivePage] = useState("groups")
+  
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
 
   const toggleMobileMenu = () => {
@@ -215,9 +214,9 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
         {/* Main Content */}
         <div className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in ">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">    Profile </h1>
+            <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">    Groups </h1>
 
-            {/*     هتشتغلى هنا يا ندددددى */}
+            {/*   هنااا عمرووو   */}
         </div>
           </div>  
     </div></div>
@@ -227,5 +226,6 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
 
 
 
-export default Profile
+export default groups;
+
 

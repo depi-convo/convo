@@ -1,8 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
 
+@custom-variant dark (&:is(.dark *));
+.font-englebert {
+  font-family: 'Englebert', sans-serif !important;
+}
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);

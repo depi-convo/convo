@@ -1,17 +1,149 @@
-
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/sidebar"
-import { FaBars, FaMoon, FaSun, FaHome, FaUser, FaUsers, FaSignOutAlt, FaKey, FaBell } from "react-icons/fa"
+import ChatList from "../components/chat-list"
+import Chatbox from "../components/Chatbox"
+import Welcome from "../components/welcome-screen"
+import { FaBars, FaMoon, FaSun } from "react-icons/fa"
 
-
-const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
+const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate()
+  const [selectedChat, setSelectedChat] = useState(null)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [activePage, setActivePage] = useState("profile")
-  const [activeTab, setActiveTab] = useState("personal")
+  const [activePage, setActivePage] = useState("home")
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+
+  // Sample chat data
+  const [chats, setChats] = useState([
+    {
+      id: 1,
+      name: "Esraa karam",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      lastMessage: "Hello",
+      time: "Today, 11:11pm",
+      unread: 0,
+      isOnline: true,
+      messages: [
+        {
+          id: 1,
+          text: "Hello",
+          sender: "them",
+          time: "11:11 PM",
+        },
+      ],
+      isTyping: false,
+    },
+    {
+      id: 2,
+      name: "Esraa karam",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      lastMessage: "Hello there",
+      time: "Today, 11:11pm",
+      unread: 2,
+      isOnline: true,
+      messages: [
+        {
+          id: 1,
+          text: "Hello there",
+          sender: "them",
+          time: "11:11 PM",
+        },
+      ],
+      isTyping: false,
+    },
+    {
+      id: 3,
+      name: "Esraa karam",
+      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      lastMessage: "Typing...",
+      time: "Today, 11:11pm",
+      unread: 0,
+      isOnline: true,
+      messages: [
+        {
+          id: 1,
+          text: "Hello",
+          sender: "them",
+          time: "11:11 PM",
+        },
+      ],
+      isTyping: true,
+    },
+  ])
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    window.addEventListener("resize", handleResize)
+    return () => window.removeEventListener("resize", handleResize)
+  }, [])
+
+  const handleChatSelect = (chat) => {
+    // Mark unread messages as read
+    const updatedChats = chats.map((c) => {
+      if (c.id === chat.id) {
+        return { ...c, unread: 0 }
+      }
+      return c
+    })
+
+    setChats(updatedChats)
+    setSelectedChat(chat)
+  }
+
+  const handleSendMessage = (chatId, message) => {
+    const newMessage = {
+      id: Date.now(),
+      text: message,
+      sender: "me",
+      time: "11:12 PM",
+    }
+
+    const updatedChats = chats.map((chat) => {
+      if (chat.id === chatId) {
+        // Add message
+        const updatedChat = {
+          ...chat,
+          messages: [...chat.messages, newMessage],
+          lastMessage: message,
+          time: "Just now",
+          isTyping: true,
+        }
+
+        // Simulate response after 2 seconds
+        setTimeout(() => {
+          setChats((prevChats) => {
+            return prevChats.map((c) => {
+              if (c.id === chatId) {
+                const responseMessage = {
+                  id: Date.now(),
+                  text: "How are you doing today?",
+                  sender: "them",
+                  time: "11:12 PM",
+                }
+
+                return {
+                  ...c,
+                  messages: [...c.messages, responseMessage],
+                  lastMessage: responseMessage.text,
+                  time: "Just now",
+                  isTyping: false,
+                }
+              }
+              return c
+            })
+          })
+        }, 2000)
+
+        return updatedChat
+      }
+      return chat
+    })
+
+    setChats(updatedChats)
+  }
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen)
@@ -37,16 +169,17 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   }
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      {/* Fixed Header for all devices */}
+    <div className="flex flex-col  bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen">
+      {/* Header - full width */}
       <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in ">
-      <div className="flex justify-between items-center p-4">
+        <div className="flex justify-between items-center p-4">
           {isMobile ? (
             <button onClick={toggleMobileMenu} className="p-2 rounded-full mr-2">
               <FaBars className="text-gray-600 dark:text-gray-300" />
             </button>
           ) : null}
-           <div className="flex items-center">
+          
+          <div className="flex items-center">
             <svg
               className="rounded-xl"
               width="40"
@@ -176,56 +309,72 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
       {/* Mobile Navigation Menu */}
       {isMobile && isMobileMenuOpen && (
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <div className="flex justify-around py-3">
-            <NavItem
-              icon={<FaHome size="20" />}
-              label="Home"
-              active={activePage === "home"}
-              onClick={() => handleNavigation("home")}
-            />
-            <NavItem
-              icon={<FaUser size="20" />}
-              label="Profile"
-              active={activePage === "profile"}
-              onClick={() => handleNavigation("profile")}
-            />
-            <NavItem
-              icon={<FaUsers size="20" />}
-              label="Groups"
-              active={activePage === "groups"}
-              onClick={() => handleNavigation("groups")}
-            />
-            <NavItem
-              icon={<FaSignOutAlt size="20" />}
-              label="Logout"
-              active={false}
-              onClick={onLogout}
-              className="text-red-500"
-            />
-          </div>
+          <nav className="py-2">
+            <ul>
+              <li>
+                <button
+                  onClick={() => handleNavigation("home")}
+                  className={`flex items-center w-full px-4 py-2 ${activePage === "home" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
+                >
+                  Home
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNavigation("profile")}
+                  className={`flex items-center w-full px-4 py-2 ${activePage === "profile" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
+                >
+                  Profile
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => handleNavigation("groups")}
+                  className={`flex items-center w-full px-4 py-2 ${activePage === "groups" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
+                >
+                  Groups
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={onLogout}
+                  className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400"
+                >
+                  Logout
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
       )}
 
-      <div className="flex flex-1 ">
-        {/* Desktop Sidebar */}
+      {/* Main content area with sidebar and chat */}
+      <div className="flex flex-1  ">
+        {/* Sidebar - fixed width */}
         <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-900 rounded-4xl dark:bg-slate-800 m-1 border-r border-gray-200 dark:border-slate-700">
           <Sidebar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout} />
         </div>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in ">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">    Profile </h1>
+        <div className="flex flex-1 ">
+          {/* Chat List - increased width */}
+          <div
+            className={`${selectedChat && isMobile ? "hidden" : "block"} w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-slate-700 `}
+          >
+            <ChatList chats={chats} onChatSelect={handleChatSelect} selectedChat={selectedChat} />
+          </div>
 
-            {/*     هتشتغلى هنا يا ندددددى */}
+          {/* Chat or Welcome Screen - reduced width */}
+          <div className={`${!selectedChat && isMobile ? "hidden" : "block"} flex-1 w-full`}>
+            {selectedChat ? (
+              <Chatbox chat={selectedChat} onSendMessage={handleSendMessage} user={user} isMobile={isMobile} />
+            ) : (
+              <Welcome user={user} />
+            )}
+          </div>
         </div>
-          </div>  
-    </div></div>
+      </div>
+    </div>
   )
 }
 
-
-
-
-export default Profile
-
+export default Home
