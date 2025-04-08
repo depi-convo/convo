@@ -1,7 +1,5 @@
-
-
 import { useState } from "react";
-import Header from "../components/header";
+import Header from "../components/Header";
 
 //بنستخدم Link علشان ننتقل بين الصفحات بدون ما الصفحة تعمل reload.
 import { Link } from "react-router-dom";
@@ -53,12 +51,11 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
 
   return (
     <div className="flex flex-col h-screen w-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-400">
-      
-     <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode}/>
+      <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
       <div className="flex-1 flex items-center justify-center px-4 mt-16 animate-slide-in-up">
         <div className="w-full max-w-md p-8 bg-white dark:bg-slate-800 rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
-          login
+            login
           </h2>
 
           {error && (
@@ -73,7 +70,7 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-              email
+                email
               </label>
               <input
                 id="email"
@@ -82,9 +79,7 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
                 placeholder="enter your email"
-      
-              /> 
-          
+              />
             </div>
 
             <div>
@@ -92,10 +87,9 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
               >
-               password
+                password
               </label>
               <div className="relative  ">
-              
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
@@ -103,9 +97,8 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
                   placeholder="enter your pass"
-                
                 />
-                 <button
+                <button
                   type="button"
                   className="absolute inset-y-0 left-0 px-3 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
@@ -116,7 +109,6 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                     <FaEye className="text-gray-500" />
                   )}
                 </button>
-               
               </div>
             </div>
 
@@ -142,7 +134,7 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-            Dont have acc{" "}
+              Dont have acc{" "}
               <Link
                 to="/signup"
                 className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
