@@ -1,11 +1,12 @@
-
-import { useState } from "react"
-import { FaSearch } from "react-icons/fa"
+import { useState } from "react";
+import { FaSearch } from "react-icons/fa";
 
 const ChatList = ({ chats, onChatSelect, selectedChat }) => {
-  const [searchQuery, setSearchQuery] = useState("")
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredChats = chats.filter((chat) => chat.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  const filteredChats = chats.filter((chat) =>
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-800 transition-colors duration-300">
@@ -32,7 +33,9 @@ const ChatList = ({ chats, onChatSelect, selectedChat }) => {
             <div
               key={chat.id}
               className={`flex items-center p-3 cursor-pointer hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors duration-200 ${
-                selectedChat?.id === chat.id ? "bg-gray-100 dark:bg-slate-700" : ""
+                selectedChat?.id === chat.id
+                  ? "bg-gray-100 dark:bg-slate-700"
+                  : ""
               }`}
               onClick={() => onChatSelect(chat)}
             >
@@ -48,13 +51,19 @@ const ChatList = ({ chats, onChatSelect, selectedChat }) => {
               </div>
               <div className="ml-3 flex-1 min-w-0">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-gray-900 dark:text-white truncate">{chat.name}</h3>
-                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-1 flex-shrink-0">{chat.time}</span>
+                  <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                    {chat.name}
+                  </h3>
+                  <span className="text-xs text-gray-500 dark:text-gray-400 ml-1 flex-shrink-0">
+                    {chat.time}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center mt-1">
                   <p
                     className={`text-sm truncate ${
-                      chat.isTyping ? "text-green-500" : "text-gray-600 dark:text-gray-300"
+                      chat.isTyping
+                        ? "text-green-500"
+                        : "text-gray-600 dark:text-gray-300"
                     }`}
                   >
                     {chat.isTyping ? "Typing..." : chat.lastMessage}
@@ -75,8 +84,7 @@ const ChatList = ({ chats, onChatSelect, selectedChat }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default ChatList
-
+export default ChatList;
