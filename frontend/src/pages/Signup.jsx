@@ -12,6 +12,7 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -36,12 +37,19 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
       setIsLoading(false)
       return
     }
+    const user = {
+      name:name,
+      email:email,
+    };
+    navigate("/profile", {
+      state: { user },
+    });
 
     // Simulate API call
     setTimeout(() => {
       const userData = {
         id: 1,
-        name: name,
+        username: name,
         email: email,
         avatar: "https://randomuser.me/api/portraits/women/44.jpg",
       }

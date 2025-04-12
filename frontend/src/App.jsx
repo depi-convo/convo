@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import Profile from "./pages/Profile";
 import Groups from "./pages/groups";
 import "./index.css";
+import EditProfile from "./pages/EditProfile";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -128,6 +129,7 @@ function App() {
               )
             }
           />
+          
           <Route
             path="/groups"
             element={
@@ -143,6 +145,25 @@ function App() {
               )
             }
           />
+
+          <Route
+            path="/edit-profile"
+            element={
+              isAuthenticated ? (
+                <EditProfile
+                  user={currentUser}
+                  onLogout={handleLogout}
+                  darkMode={darkMode}
+                  toggleDarkMode={toggleDarkMode}
+                />
+              ) : (
+                <Navigate to="/signin" />
+              )
+            }
+          />
+       
+           <Route path="/edit-profile" element={<EditProfile />} />
+
           <Route
             path="*"
             element={<Navigate to={isAuthenticated ? "/" : "/signin"} />}

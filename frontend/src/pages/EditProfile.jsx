@@ -1,93 +1,49 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Sidebar from '../components/sidebar';
+import { FaHome, FaMoon, FaSignOutAlt, FaSnapchat, FaSun } from 'react-icons/fa';
 
+const EditProfile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
+  const [name, setName] = useState(user?.username || '');
+  const [picture, setPicture] = useState(null);
+  const [activePage, setActivePage] = useState("profile");
+  const navigate = useNavigate();
 
-import { useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
-import Sidebar from "../components/sidebar"
-import { FaBars, FaMoon, FaSun, FaHome, FaUser, FaUsers, FaSignOutAlt, FaKey, FaBell } from "react-icons/fa"
-
-
-const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [activePage, setActivePage] = useState("profile")
-  const [activeTab, setActiveTab] = useState("personal")
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [imageSrc, setImageSrc] = useState("https://randomuser.me/api/portraits/women/44.jpg");
-  
-
-
-  const handleDeletePhoto = () => {
-    setImageSrc(""); 
-  };
-
-  const handleChangePhoto = () => {
-    const newImageSrc = prompt("Enter new image URL:");
-    if (newImageSrc) {
-      setImageSrc(newImageSrc); 
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log('Name:', name);
+    console.log('Picture:', picture);
+    navigate('/profile');
   };
 
   const handleClose = () => {
-    navigate("/");
-    
+    navigate('/profile');
   };
-  
-  const handleEditClick = () => {
-    navigate("/edit-profile"); 
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
-
-  const handleNavigation = (page) => {
-    setActivePage(page)
-    setIsMobileMenuOpen(false)
-
-    switch (page) {
-      case "home":
-        navigate("/")
-        break
-      case "profile":
-        navigate("/profile")
-        break
-      case "groups":
-        navigate("/groups")
-        break
-      default:
-        navigate("/")
-    }
-  }
-
 
   return (
     <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      {/* Fixed Header for all devices */}
-      <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in ">
-      <div className="flex justify-between items-center p-4">
-          {isMobile ? (
-            <button onClick={toggleMobileMenu} className="p-2 rounded-full mr-2">
-              <FaBars className="text-gray-600 dark:text-gray-300" />
-            </button>
-          ) : null}
-           <div className="flex items-center">
-            <svg
-              className="rounded-xl"
-              width="40"
-              height="40"
-              viewBox="0 0 93 93"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <rect
-                x="0.604126"
-                width="92.1108"
-                height="92.1108"
-                rx="25"
-                transform="rotate(0.375795 0.604126 0)"
-                fill="black"
-              />
-              <path
+      {/* Fixed Header */}
+      <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in">
+  <div className="flex justify-between items-center p-4">
+    <div className="flex items-center">
+      {/* Logo */}
+      <svg
+        className="rounded-xl"
+        width="40"
+        height="40"
+        viewBox="0 0 93 93"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          x="0.604126"
+          width="92.1108"
+          height="92.1108"
+          rx="25"
+          transform="rotate(0.375795 0.604126 0)"
+          fill="black"
+        />
+         <path
                 d="M75.1001 25.9193C74.6504 25.4652 74.1144 25.1064 73.5229 24.8645C72.9313 24.6226 72.2974 24.5024 71.6587 24.5112L71.6323 24.511C67.8717 24.4863 64.8767 21.4119 64.9013 17.6579C64.915 17.032 64.8048 16.4095 64.5771 15.8262C64.3494 15.243 64.0087 14.7106 63.5744 14.2595C63.1402 13.8084 62.6211 13.4477 62.047 13.1979C61.4728 12.9482 60.855 12.8144 60.229 12.8043L22.003 12.5536C21.3774 12.5555 20.7584 12.6809 20.1815 12.9227C19.6046 13.1645 19.0811 13.5178 18.6411 13.9625C18.2011 14.4071 17.8532 14.9342 17.6175 15.5137C17.3817 16.0931 17.2628 16.7134 17.2674 17.3389C17.2427 21.0995 14.1747 24.1209 10.4141 24.0963L10.4141 24.1029C9.78095 24.0864 9.15093 24.1967 8.56105 24.4273C7.97118 24.6579 7.43337 25.004 6.97926 25.4455C6.52515 25.887 6.1639 26.4148 5.91677 26.998C5.66964 27.5811 5.54161 28.2078 5.54022 28.8411L5.46003 41.0663C5.45398 41.6996 5.57464 42.3277 5.8149 42.9137C6.05517 43.4998 6.41019 44.0318 6.85909 44.4786C7.308 44.9254 7.84171 45.2778 8.42884 45.5154C9.01598 45.7529 9.64468 45.8705 10.278 45.8615C12.0779 45.8733 13.7997 46.5987 15.0654 47.8786C16.3311 49.1585 17.0372 50.8883 17.0289 52.6883L16.9475 65.1048C16.9371 66.6882 18.9315 67.4073 19.9292 66.18L26.8801 57.6089L59.9337 57.8257C60.5592 57.8238 61.1782 57.6983 61.7551 57.4565C62.332 57.2148 62.8555 56.8614 63.2956 56.4168C63.7355 55.9722 64.0834 55.445 64.3192 54.8656C64.5549 54.2861 64.6739 53.6659 64.6693 53.0404L64.6693 53.0338C64.694 49.2732 67.7488 46.245 71.5093 46.2697L71.5159 46.2697C72.1492 46.288 72.78 46.1792 73.3707 45.9498C73.9614 45.7203 74.5001 45.3749 74.9549 44.9338C75.4097 44.4928 75.7715 43.9651 76.0194 43.3819C76.2667 42.7987 76.3948 42.1717 76.3964 41.5381L76.4766 29.3064C76.4846 28.0858 76.0308 26.8623 75.1001 25.9193ZM66.8688 41.601C66.8379 43.3911 66.1026 45.097 64.8222 46.3484C63.5418 47.5998 61.8196 48.296 60.0292 48.2859L21.7307 48.0347C19.9403 48.0213 18.2274 47.3026 16.9636 46.0345C15.6996 44.7664 14.9867 43.051 14.9794 41.2607L15.0613 28.7716C15.0921 26.9815 15.8275 25.2756 17.1079 24.0242C18.3883 22.7728 20.1105 22.0766 21.9009 22.0867L21.901 22.0735L21.934 22.0737L21.9339 22.0803L60.1863 22.3312C63.9205 22.3557 66.929 25.384 66.9442 29.1053L66.8622 41.601L66.8688 41.601Z"
                 fill="white"
               />
@@ -127,13 +83,15 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                   <stop offset="1" stopColor="#CF4BFF" />
                 </linearGradient>
               </defs>
-            </svg>
-  
-            <h1 className="text-2xl font-bold ml-2 text-black dark:text-gray-50 font-englebert">
-              Convo
-            </h1>
-          </div>
-          <button
+      </svg>
+
+      <h1 className="text-2xl font-bold ml-2 text-black dark:text-gray-50 font-englebert">
+        Convo
+      </h1>
+    </div>
+
+    {/* زر تفعيل الوضع الليلي */}
+    <button
             onClick={toggleDarkMode}
             className="relative p-2 rounded-full overflow-hidden transition-all duration-300 shadow-md hover:shadow-lg"
             style={{
@@ -144,7 +102,7 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
               transition: "background-color 0.5s, transform 0.5s",
             }}
           >
-            <div
+           <div
               className="absolute inset-0 flex items-center justify-center"
               style={{
                 opacity: darkMode ? 0 : 1,
@@ -152,20 +110,20 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                 transform: darkMode ? "scale(0.5)" : "scale(1)",
               }}
             >
-              <div className="relative">
-                <FaMoon style={{ color: "#334155", fontSize: "20px" }} />
-                <div
-                  className="absolute top-0 right-0 w-2 h-2 rounded-full"
-                  style={{
-                    backgroundColor: "#94a3b8",
-                    transform: "translate(25%, -25%)",
-                  }}
-                />
-              </div>
-            </div>
-  
+           <div className="relative">
+            <FaMoon style={{ color: "#334155", fontSize: "20px" }} />
             <div
-              className="absolute inset-0 flex items-center justify-center"
+              className="absolute top-0 right-0 w-2 h-2 roundedfull"
+              style={{
+                backgroundColor: "#94a3b8",
+              }}
+              />
+
+           </div>
+            </div>
+            
+            <div
+            className="absolute inset-0 flex items-center justify-center"
               style={{
                 opacity: darkMode ? 1 : 0,
                 transition: "opacity 0.5s",
@@ -173,137 +131,120 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
               }}
             >
               <div className="relative">
-                <FaSun style={{ color: "#fbbf24", fontSize: "22px" }} />
-                <div
-                  className="absolute top-0 left-0 w-1 h-1 rounded-full animate-pulse"
-                  style={{
-                    backgroundColor: "#fef3c7",
-                    boxShadow: "0 0 8px 2px rgba(251, 191, 36, 0.6)",
-                  }}
-                />
-              </div>
-            </div>
-  
+            <FaSun style={{ color: "#fbbf24", fontSize: "22px" }} />
             <div
-              className="absolute inset-0 bg-gradient-to-br"
+              className="absolute top-0 right-0 w-1 h-1 roundedfull animate-pulse"
               style={{
-                opacity: 0.1,
-                background: darkMode
-                  ? "radial-gradient(circle at 70% 70%, #60a5fa, transparent 50%)"
-                  : "radial-gradient(circle at 30% 30%, #fbbf24, transparent 50%)",
+                backgroundColor: "#fef3c7",
+                boxShadow: "0 0 8px 2px rgba(251, 191, 36, 0.6)",
               }}
-            />
-          </button>
-        </div>
-      </header>
-
-      {/* Mobile Navigation Menu */}
-      {isMobile && isMobileMenuOpen && (
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <div className="flex justify-around py-3">
-            <NavItem
-              icon={<FaHome size="20" />}
-              label="Home"
-              active={activePage === "home"}
-              onClick={() => handleNavigation("home")}
-            />
-            <NavItem
-              icon={<FaUser size="20" />}
-              label="Profile"
-              active={activePage === "profile"}
-              onClick={() => handleNavigation("profile")}
-            />
-            <NavItem
-              icon={<FaUsers size="20" />}
-              label="Groups"
-              active={activePage === "groups"}
-              onClick={() => handleNavigation("groups")}
-            />
-            <NavItem
-              icon={<FaSignOutAlt size="20" />}
-              label="Logout"
-              active={false}
-              onClick={onLogout}
-              className="text-red-500"
-            />
-          </div>
-        </div>
-      )}
+              />
+            </div>
+            </div>
+                    
       
-  
-  
+     
+
+      {/* تأثير خلفية أنيق */}
+      <div
+        className="absolute inset-0 bg-gradient-to-br"
+        style={{
+          opacity: 0.1,
+          background: darkMode
+            ? "radial-gradient(circle at 70% 70%, #60a5fa, transparent 50%)"
+            : "radial-gradient(circle at 30% 30%, #fbbf24, transparent 50%)",
+        }}
+      />
+    </button>
+  </div>
+</header>
 
 
-      <div className="flex flex-1 ">
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-900 rounded-4xl dark:bg-slate-800 m-1 border-r border-gray-200 dark:border-slate-700">
-          <Sidebar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout} />
-        </div>
+
+    
+
+
+      <div className="flex flex-1">
+  {/* Sidebar */} 
+  <div className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-900 rounded-4xl dark:bg-slate-800 m-1 border-r border-gray-200 dark:border-slate-700">
+    <Sidebar
+      activePage={activePage}
+      setActivePage={(page) => {
+        setActivePage(page);
+        switch (page) {
+          case "home":
+            navigate("/");
+            break;
+          case "profile":
+            navigate("/profile");
+            break;
+          case "groups":
+            navigate("/groups");
+            break;
+          default:
+            navigate("/");
+        }
+      }}
+      user={user}
+      onLogout={onLogout}
+    />
+  </div>
 
         {/* Main Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in ">
+        <div className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">    Profile </h1>
-            
-    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 text-center">
-      <div className="w-36 h-36 sm:w-40 sm:h-40 rounded-full mx-auto mb-6 flex items-center justify-center bg-indigo-100 text-indigo-700 text-4xl font-bold border-4 border-indigo-500 shadow-lg overflow-hidden">
-        {/* صورة المستخدم */}
-        {imageSrc ? (
-          <img
-            src={imageSrc}
-            alt="Profile"
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <span>No image</span> 
-        )}
-      </div>
-      
+            <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">
+               Edit Profile
+            </h1>
 
+            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-6 text-center">
+              <form onSubmit={handleSubmit}>
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Profile Picture
+                  </label>
+                  <input
+                    type="file"
+                    onChange={(e) => setPicture(e.target.files[0])}
+                    className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                  />
+                </div>
 
-      <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-        {user?.username}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Your Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your name"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  />
+                </div>
 
-      </h2>
-      <p className="text-gray-500 dark:text-gray-300 mb-4">
-        {user?.email || "example@email.com"}
-      </p>
-
-      <div className="flex justify-center gap-4 flex-wrap">
-        <button
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
-          onClick={handleDeletePhoto}
-        >
-          Delete Photo
-        </button>
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-          onClick={handleEditClick}
-        >
-        
-          EditProfile
-        </button>
-
-        <button
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-          onClick={handleClose}
-        >
-          Close
-        </button>
+                <div className="flex justify-center gap-4 flex-wrap">
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleClose}
+                    className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+  );
+};
 
-
-  
-
-        </div>
-          </div>  
-    </div></div>
-  )
-}
-
-
-
-
-export default Profile
-
+export default EditProfile;
