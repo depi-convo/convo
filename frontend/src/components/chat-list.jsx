@@ -11,9 +11,9 @@ const ChatList = ({ chats, onChatSelect, selectedChat }) => {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-slate-800 transition-colors duration-300">
       {/* Search */}
-      <div className="p-3 border-b border-gray-200 dark:border-slate-700">
+      <div className="p-3 border-b border-gray-200 dark:border-slate-700 ">
         <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none ">
             <FaSearch className="text-gray-400" />
           </div>
           <input

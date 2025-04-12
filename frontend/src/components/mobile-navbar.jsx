@@ -24,7 +24,7 @@ const MobileNav = ({ activePage, setActivePage, onLogout }) => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 flex justify-around items-center py-3 px-2 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-10">
+    <div className="absolute  left-0 right-0 flex justify-around items-center py-3 px-2 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-10">
       <NavItem
         icon={<FaHome size="20" />}
         label="Home"
@@ -61,7 +61,7 @@ const NavItem = ({ icon, label, active, onClick, className = "" }) => {
         className={`relative flex items-center justify-center ${active ? "text-blue-500" : `text-gray-500 dark:text-gray-400 ${className}`}`}
       >
         {icon}
-        {active && <div className="absolute -top-1 w-2 h-2 bg-pink-500 rounded-full" />}
+        {active && <div className="absolute -top-1 w-2 h-2 bg-blue-500 rounded-full" />}
       </div>
       <span className={`text-xs mt-1 ${active ? "text-blue-500" : "text-gray-500 dark:text-gray-400"}`}>{label}</span>
     </button>

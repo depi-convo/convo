@@ -5,6 +5,7 @@ import ChatList from "../components/chat-list"
 import Chatbox from "../components/Chatbox"
 import Welcome from "../components/welcome-screen"
 import { FaBars, FaMoon, FaSun } from "react-icons/fa"
+import MobileNavbar from "../components/mobile-navbar"
 
 const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate()
@@ -135,7 +136,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
               return c
             })
           })
-        }, 2000)
+        }, 1000)
 
         return updatedChat
       }
@@ -244,7 +245,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           </div>
           <button
             onClick={toggleDarkMode}
-            className="relative p-2 rounded-full overflow-hidden transition-all duration-300 shadow-md hover:shadow-lg"
+            className="relative p-2 rounded-full  transition-all duration-300 shadow-md hover:shadow-lg"
             style={{
               backgroundColor: darkMode ? "#0f172a" : "#f0f9ff",
               width: "48px",
@@ -306,52 +307,10 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
         </div>
       </header>
 
-      {/* Mobile Navigation Menu */}
-      {isMobile && isMobileMenuOpen && (
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <nav className="py-2">
-            <ul>
-              <li>
-                <button
-                  onClick={() => handleNavigation("home")}
-                  className={`flex items-center w-full px-4 py-2 ${activePage === "home" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
-                >
-                  Home
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNavigation("profile")}
-                  className={`flex items-center w-full px-4 py-2 ${activePage === "profile" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
-                >
-                  Profile
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => handleNavigation("groups")}
-                  className={`flex items-center w-full px-4 py-2 ${activePage === "groups" ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400" : "text-gray-700 dark:text-gray-300"}`}
-                >
-                  Groups
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={onLogout}
-                  className="flex items-center w-full px-4 py-2 text-red-600 dark:text-red-400"
-                >
-                  Logout
-                </button>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      )}
-
       {/* Main content area with sidebar and chat */}
       <div className="flex flex-1  ">
         {/* Sidebar - fixed width */}
-        <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-900 rounded-4xl dark:bg-slate-800 m-1 border-r border-gray-200 dark:border-slate-700">
+        <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-900 rounded-4xl dark:bg-indigo-900 m-1 border-r border-gray-200 dark:border-slate-700">
           <Sidebar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout} />
         </div>
 
@@ -372,6 +331,12 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             )}
           </div>
         </div>
+        {/* Mobile Navigation Menu */}
+      {isMobile && isMobileMenuOpen && (
+        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
+          <MobileNavbar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout}></MobileNavbar>
+        </div>
+      )}
       </div>
     </div>
   )

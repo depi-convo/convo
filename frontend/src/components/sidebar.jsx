@@ -24,7 +24,7 @@ const Sidebar = ({ activePage, setActivePage, user, onLogout }) => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center w-20  mt-5  gap-48   dark:bg-blue-600 rounded-2xl">
+    <div className="flex flex-col items-center justify-center w-20  mt-5  gap-48   dark:bg-indigo-900 rounded-2xl">
 
       {/* Navigation */}
       <nav className="flex flex-col items-center space-y-8 flex-1 mt-8">
