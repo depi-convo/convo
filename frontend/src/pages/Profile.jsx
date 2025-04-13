@@ -4,6 +4,8 @@ import { useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 import Sidebar from "../components/sidebar"
 import { FaBars, FaMoon, FaSun, FaHome, FaUser, FaUsers, FaSignOutAlt, FaKey, FaBell } from "react-icons/fa"
+import MobileNavbar from "../components/mobile-navbar"
+
 
 
 const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
@@ -13,7 +15,7 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const [activeTab, setActiveTab] = useState("personal")
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [imageSrc, setImageSrc] = useState("https://randomuser.me/api/portraits/women/44.jpg");
-  
+
 
 
   const handleDeletePhoto = () => {
@@ -195,40 +197,22 @@ const Profile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             />
           </button>
         </div>
+       
+
       </header>
 
       {/* Mobile Navigation Menu */}
       {isMobile && isMobileMenuOpen && (
         <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <div className="flex justify-around py-3">
-            <NavItem
-              icon={<FaHome size="20" />}
-              label="Home"
-              active={activePage === "home"}
-              onClick={() => handleNavigation("home")}
-            />
-            <NavItem
-              icon={<FaUser size="20" />}
-              label="Profile"
-              active={activePage === "profile"}
-              onClick={() => handleNavigation("profile")}
-            />
-            <NavItem
-              icon={<FaUsers size="20" />}
-              label="Groups"
-              active={activePage === "groups"}
-              onClick={() => handleNavigation("groups")}
-            />
-            <NavItem
-              icon={<FaSignOutAlt size="20" />}
-              label="Logout"
-              active={false}
-              onClick={onLogout}
-              className="text-red-500"
-            />
-          </div>
+          <MobileNavbar
+            activePage={activePage}
+            setActivePage={handleNavigation}
+            user={user}
+            onLogout={onLogout}
+          />
         </div>
       )}
+
       
   
   

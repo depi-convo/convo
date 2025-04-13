@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/sidebar';
 import { FaHome, FaMoon, FaSignOutAlt, FaSnapchat, FaSun } from 'react-icons/fa';
 
+
 const EditProfile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const [name, setName] = useState(user?.username || '');
   const [picture, setPicture] = useState(null);
