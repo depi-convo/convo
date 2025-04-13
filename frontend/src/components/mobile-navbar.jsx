@@ -24,7 +24,7 @@ const MobileNav = ({ activePage, setActivePage, onLogout }) => {
   }
 
   return (
-    <div className="absolute  left-0 right-0 flex justify-around items-center py-3 px-2 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-10">
+    <div className="relative left-0 right-0 flex justify-around items-center py-3 px-2 bg-white dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 z-10">
       <NavItem
         icon={<FaHome size="20" />}
         label="Home"

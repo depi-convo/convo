@@ -307,6 +307,13 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
         </div>
       </header>
 
+      {/* Mobile Navigation Menu */}
+      {isMobile && isMobileMenuOpen && (
+        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
+          <MobileNavbar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout}></MobileNavbar>
+        </div>
+      )}
+
       {/* Main content area with sidebar and chat */}
       <div className="flex flex-1  ">
         {/* Sidebar - fixed width */}
@@ -331,12 +338,6 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             )}
           </div>
         </div>
-        {/* Mobile Navigation Menu */}
-      {isMobile && isMobileMenuOpen && (
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <MobileNavbar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout}></MobileNavbar>
-        </div>
-      )}
       </div>
     </div>
   )
