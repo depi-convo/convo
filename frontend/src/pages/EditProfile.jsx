@@ -167,7 +167,7 @@ const EditProfile = ({ user, onLogout, darkMode, toggleDarkMode }) => {
 
       <div className="flex flex-1">
   {/* Sidebar */} 
-  <div className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-900 rounded-4xl dark:bg-slate-800 m-1 border-r border-gray-200 dark:border-slate-700">
+  <div className="hidden md:block md:w-20 flex-shrink-0  bg-indigo-800 rounded-4xl dark:bg-slate-800 m-1 border-r border-gray-200 dark:border-slate-700  ">
     <Sidebar
       activePage={activePage}
       setActivePage={(page) => {

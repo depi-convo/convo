@@ -48,7 +48,7 @@ const MobileNav = ({ activePage, setActivePage, onLogout }) => {
         label="Logout"
         active={false}
         onClick={onLogout}
-        className="text-red-500"
+      
       />
     </div>
   )
