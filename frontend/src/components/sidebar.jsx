@@ -1,55 +1,44 @@
+import { useNavigate } from "react-router-dom";
+import { FaHome, FaUser, FaUsers, FaSignOutAlt } from "react-icons/fa";
+import { Button } from "@/components/ui/button";
 
-import { useNavigate } from "react-router-dom"
-import { FaHome, FaUser, FaUsers, FaSignOutAlt } from "react-icons/fa"
+const iconMap = {
+  Home: <FaHome size="20" />,
+  Profile: <FaUser size="20" />,
+  Groups: <FaUsers size="20" />,
+};
 
-const Sidebar = ({ activePage, setActivePage, user, onLogout }) => {
-  const navigate = useNavigate()
+const links = [
+  { name: "Home", path: "/" },
+  { name: "Profile", path: "/profile" },
+  { name: "Groups", path: "/groups" },
+];
 
-  const handleNavigation = (page) => {
-    setActivePage(page)
+const Sidebar = ({ activePage, setActivePage, onLogout }) => {
+  const navigate = useNavigate();
 
-    switch (page) {
-      case "home":
-        navigate("/")
-        break
-      case "profile":
-        navigate("/profile")
-        break
-      case "groups":
-        navigate("/groups")
-        break
-      default:
-        navigate("/")
-    }
-  }
+  const handleNavigation = (page, path) => {
+    setActivePage(page);
+    navigate(path);
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center w-20  mt-5  gap-48   dark:bg-indigo-800 rounded-2xl">
-
+    <div className="flex flex-col items-center justify-between w-20 py-8 dark:bg-indigo-800 rounded-2xl h-full">
       {/* Navigation */}
-      <nav className="flex flex-col items-center space-y-8 flex-1 mt-8">
-        <SidebarIcon
-          icon={<FaHome size="20" />}
-          label="Home"
-          active={activePage === "home"}
-          onClick={() => handleNavigation("home")}
-        />
-        <SidebarIcon
-          icon={<FaUser size="20" />}
-          label="Profile"
-          active={activePage === "profile"}
-          onClick={() => handleNavigation("profile")}
-        />
-        <SidebarIcon
-          icon={<FaUsers size="20" />}
-          label="Groups"
-          active={activePage === "groups"}
-          onClick={() => handleNavigation("groups")}
-        />
+      <nav className="flex flex-col items-center space-y-8">
+        {links.map((link) => (
+          <SidebarIcon
+            key={link.name}
+            icon={iconMap[link.name]}
+            label={link.name}
+            active={activePage.toLowerCase() === link.name.toLowerCase()}
+            onClick={() => handleNavigation(link.name.toLowerCase(), link.path)}
+          />
+        ))}
       </nav>
 
       {/* Logout */}
-      <div className="mt-auto mb-8">
+      <div className="mt-auto">
         <SidebarIcon
           icon={<FaSignOutAlt size="20" />}
           label="Logout"
@@ -59,22 +48,25 @@ const Sidebar = ({ activePage, setActivePage, user, onLogout }) => {
         />
       </div>
     </div>
-  )
-}
+  );
+};
 
 const SidebarIcon = ({ icon, label, active, onClick, className = "" }) => {
   return (
     <div className="flex flex-col items-center">
-      <button
-        className={`relative flex items-center justify-center h-12 w-12 rounded-full text-white hover:bg-blue-400 transition-all duration-200 ${active ? "bg-blue-400" : ""} ${className}`}
+      <Button
+        variant="ghost"
+        size="icon"
+        className={`rounded-full text-white hover:bg-blue-400 transition-all duration-200 ${
+          active ? "bg-blue-400" : ""
+        } ${className}`}
         onClick={onClick}
       >
         {icon}
-      </button>
+      </Button>
       <span className="text-xs text-white mt-1">{label}</span>
     </div>
-  )
-}
+  );
+};
 
-export default Sidebar
-
+export default Sidebar;

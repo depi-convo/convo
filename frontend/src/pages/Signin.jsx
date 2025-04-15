@@ -1,32 +1,35 @@
-import { useState, useEffect } from "react"
-import Header from "../components/header"
-import { motion } from "framer-motion"
-import { Link } from "react-router-dom"
-import { FaEye, FaEyeSlash } from "react-icons/fa"
+import { useState, useEffect } from "react";
+import Header from "../components/Header";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const AnimatedBackground = ({ darkMode }) => {
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
-  })
+  });
 
   useEffect(() => {
     const handleResize = () => {
       setWindowSize({
         width: window.innerWidth,
         height: window.innerHeight,
-      })
-    }
+      });
+    };
 
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-  const shapes = []
-  const shapeCount = 15
+  const shapes = [];
+  const shapeCount = 15;
 
   for (let i = 0; i < shapeCount; i++) {
-    const size = Math.random() * 100 + 20
+    const size = Math.random() * 100 + 20;
     shapes.push({
       id: i,
       x: Math.random() * windowSize.width,
@@ -35,7 +38,7 @@ const AnimatedBackground = ({ darkMode }) => {
       animationDuration: Math.random() * 20 + 10,
       animationDelay: Math.random() * 5,
       type: Math.random() > 0.5 ? "circle" : "square",
-    })
+    });
   }
 
   const animationKeyframes = `
@@ -51,7 +54,7 @@ const AnimatedBackground = ({ darkMode }) => {
       0%, 100% { opacity: 0.4; }
       50% { opacity: 0.6; }
     }
-  `
+  `;
 
   return (
     <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -69,7 +72,7 @@ const AnimatedBackground = ({ darkMode }) => {
         <div
           key={shape.id}
           className={`
-            absolute opacity-10 
+            absolute opacity-10
             ${darkMode ? "bg-blue-300" : "bg-blue-600"}
             ${shape.type === "circle" ? "rounded-full" : "rounded-md"}
           `}
@@ -85,25 +88,25 @@ const AnimatedBackground = ({ darkMode }) => {
       ))}
       <style jsx>{animationKeyframes}</style>
     </div>
-  )
-}
+  );
+};
 
 const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
 
     if (!email || !password) {
-      setError("All fields required")
-      setIsLoading(false)
-      return
+      setError("All fields required");
+      setIsLoading(false);
+      return;
     }
 
     setTimeout(() => {
@@ -112,12 +115,12 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
         name: "Esraa Karam",
         email: email,
         avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      }
+      };
 
-      onLogin(userData)
-      setIsLoading(false)
-    }, 1000)
-  }
+      onLogin(userData);
+      setIsLoading(false);
+    }, 1000);
+  };
 
   return (
     <motion.div
@@ -148,42 +151,52 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                email
-              </label>
-              <input
+              <Label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Email
+              </Label>
+              <Input
                 id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                placeholder="enter your email"
+                placeholder="Enter your email"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                password
-              </label>
+              <Label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Password
+              </Label>
               <div className="relative">
-                <input
+                <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                  placeholder="enter your pass"
+                  placeholder="Enter your password"
                 />
-                {/* تقدر تضيف زرار عرض الباسورد هنا */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
             </div>
 
             <div>
-              <motion.button
+              <Button
                 type="submit"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                className={`w-full py-2 px-4 bg-indigo-700  hover:bg-indigo-800  text-white font-medium rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                className={`w-full py-2 px-4 bg-indigo-700 hover:bg-indigo-800 text-white font-medium rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
                   isLoading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
                 disabled={isLoading}
@@ -191,27 +204,30 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                 {isLoading ? (
                   <div className="flex justify-center items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span className="ml-2">loading</span>
+                    <span className="ml-2">Loading</span>
                   </div>
                 ) : (
-                  "login"
+                  "Login"
                 )}
-              </motion.button>
+              </Button>
             </div>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-indigo-700 dark:text-blue-400 hover:underline font-medium">
-                signup
+              <Link
+                to="/signup"
+                className="text-indigo-700 dark:text-blue-400 hover:underline font-medium"
+              >
+                Sign up
               </Link>
             </p>
           </div>
         </motion.div>
       </div>
     </motion.div>
-  )
-}
+  );
+};
 
-export default Signin
+export default Signin;

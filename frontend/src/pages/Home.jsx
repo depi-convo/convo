@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
-import Sidebar from "../components/sidebar"
-import ChatList from "../components/chat-list"
-import Chatbox from "../components/Chatbox"
-import Welcome from "../components/welcome-screen"
-import { FaBars, FaMoon, FaSun } from "react-icons/fa"
-import MobileNavbar from "../components/mobile-navbar"
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Sidebar from "../components/sidebar";
+import ChatList from "../components/chat-list";
+import Chatbox from "../components/Chatbox";
+import Welcome from "../components/welcome-screen";
+import { FaBars, FaMoon, FaSun } from "react-icons/fa";
+import MobileNavbar from "../components/mobile-navbar";
 
 const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
-  const navigate = useNavigate()
-  const [selectedChat, setSelectedChat] = useState(null)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [activePage, setActivePage] = useState("home")
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
+  const navigate = useNavigate();
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activePage, setActivePage] = useState("home");
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   // Sample chat data
   const [chats, setChats] = useState([
@@ -38,8 +38,8 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
     },
     {
       id: 2,
-      name: "Esraa karam",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      name: "Medhat Shalaby",
+      avatar: "https://randomuser.me/api/portraits/men/13.jpg",
       lastMessage: "Hello there",
       time: "Today, 11:11pm",
       unread: 2,
@@ -56,8 +56,8 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
     },
     {
       id: 3,
-      name: "Esraa karam",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      name: "Akram Hosny",
+      avatar: "https://randomuser.me/api/portraits/men/44.jpg",
       lastMessage: "Typing...",
       time: "Today, 11:11pm",
       unread: 0,
@@ -72,29 +72,29 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
       ],
       isTyping: true,
     },
-  ])
+  ]);
 
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+      setIsMobile(window.innerWidth < 768);
+    };
 
-    window.addEventListener("resize", handleResize)
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleChatSelect = (chat) => {
     // Mark unread messages as read
     const updatedChats = chats.map((c) => {
       if (c.id === chat.id) {
-        return { ...c, unread: 0 }
+        return { ...c, unread: 0 };
       }
-      return c
-    })
+      return c;
+    });
 
-    setChats(updatedChats)
-    setSelectedChat(chat)
-  }
+    setChats(updatedChats);
+    setSelectedChat(chat);
+  };
 
   const handleSendMessage = (chatId, message) => {
     const newMessage = {
@@ -102,7 +102,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
       text: message,
       sender: "me",
       time: "11:12 PM",
-    }
+    };
 
     const updatedChats = chats.map((chat) => {
       if (chat.id === chatId) {
@@ -113,7 +113,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           lastMessage: message,
           time: "Just now",
           isTyping: true,
-        }
+        };
 
         // Simulate response after 2 seconds
         setTimeout(() => {
@@ -125,7 +125,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                   text: "How are you doing today?",
                   sender: "them",
                   time: "11:12 PM",
-                }
+                };
 
                 return {
                   ...c,
@@ -133,43 +133,43 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                   lastMessage: responseMessage.text,
                   time: "Just now",
                   isTyping: false,
-                }
+                };
               }
-              return c
-            })
-          })
-        }, 1000)
+              return c;
+            });
+          });
+        }, 1000);
 
-        return updatedChat
+        return updatedChat;
       }
-      return chat
-    })
+      return chat;
+    });
 
-    setChats(updatedChats)
-  }
+    setChats(updatedChats);
+  };
 
   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
 
   const handleNavigation = (page) => {
-    setActivePage(page)
-    setIsMobileMenuOpen(false)
+    setActivePage(page);
+    setIsMobileMenuOpen(false);
 
     switch (page) {
       case "home":
-        navigate("/")
-        break
+        navigate("/");
+        break;
       case "profile":
-        navigate("/profile")
-        break
+        navigate("/profile");
+        break;
       case "groups":
-        navigate("/groups")
-        break
+        navigate("/groups");
+        break;
       default:
-        navigate("/")
+        navigate("/");
     }
-  }
+  };
 
   return (
     <div className="flex flex-col  bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen overflow-hidden">
@@ -177,15 +177,25 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
       <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in   ">
         <div className="flex justify-between items-center pr-4 pl-4 pt-2 pb-2 ">
           {isMobile ? (
-            <button onClick={toggleMobileMenu} className="p-2 rounded-full mr-2">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-full mr-2"
+            >
               <FaBars className="text-gray-600 dark:text-gray-300" />
             </button>
           ) : null}
 
           <div className="flex items-center">
-          <img src="https://img.icons8.com/?size=100&id=hCvhdugyicF1&format=png&color=000000" width={"50px"}  height={"10px"} alt="logo" ></img>
+            <img
+              src="https://img.icons8.com/?size=100&id=hCvhdugyicF1&format=png&color=000000"
+              width={"50px"}
+              height={"10px"}
+              alt="logo"
+            ></img>
 
-            <h1 className="text-2xl font-bold ml-2 text-black dark:text-gray-50 font-englebert">Convo</h1>
+            <h1 className="text-2xl font-bold ml-2 text-black dark:text-gray-50 font-englebert">
+              Convo
+            </h1>
           </div>
           <button
             onClick={toggleDarkMode}
@@ -263,12 +273,16 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
         </div>
       )}
 
-
       {/* Main content area with sidebar and chat */}
       <div className="flex flex-1 overflow-hidden ">
         {/* Sidebar - fixed width */}
         <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-800 rounded-4xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700">
-          <Sidebar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout} />
+          <Sidebar
+            activePage={activePage}
+            setActivePage={handleNavigation}
+            user={user}
+            onLogout={onLogout}
+          />
         </div>
 
         <div className="flex flex-1 ">
@@ -276,13 +290,24 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           <div
             className={`${selectedChat && isMobile ? "hidden" : "block"} w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-slate-700 h-full overflow-hidden`}
           >
-            <ChatList chats={chats} onChatSelect={handleChatSelect} selectedChat={selectedChat} />
+            <ChatList
+              chats={chats}
+              onChatSelect={handleChatSelect}
+              selectedChat={selectedChat}
+            />
           </div>
 
           {/* Chat or Welcome Screen - reduced width */}
-          <div className={`${!selectedChat && isMobile ? "hidden" : "block"} flex-1 w-full h-full overflow-hidden`}>
+          <div
+            className={`${!selectedChat && isMobile ? "hidden" : "block"} flex-1 w-full h-full overflow-hidden`}
+          >
             {selectedChat ? (
-              <Chatbox chat={selectedChat} onSendMessage={handleSendMessage} user={user} isMobile={isMobile} />
+              <Chatbox
+                chat={selectedChat}
+                onSendMessage={handleSendMessage}
+                user={user}
+                isMobile={isMobile}
+              />
             ) : (
               <Welcome user={user} />
             )}
@@ -290,7 +315,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
