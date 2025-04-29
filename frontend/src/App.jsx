@@ -146,12 +146,14 @@ function App() {
             }
           />
 
+...
           <Route
             path="/edit-profile"
             element={
               isAuthenticated ? (
                 <EditProfile
                   user={currentUser}
+                setUser={setCurrentUser}
                   onLogout={handleLogout}
                   darkMode={darkMode}
                   toggleDarkMode={toggleDarkMode}
@@ -161,6 +163,7 @@ function App() {
               )
             }
           />
+
        
            <Route path="/edit-profile" element={<EditProfile />} />
 
