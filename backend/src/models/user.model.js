@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      match: [/.+\@.+\..+/, "Please fill a valid email address"],
     },
     fullName: {
       type: String,
@@ -16,10 +17,24 @@ const userSchema = new mongoose.Schema(
       required: true,
       minlength: 6,
     },
+    phoneNumber: {
+      type: String,
+      default: "",
+    },
     profilePic: {
       type: String,
       default: "",
     },
+    friends: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User", 
+      default: [] 
+    }],
+    blocked: [{ 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "User", 
+      default: [] 
+    }],
   },
   { timestamps: true },
 );
