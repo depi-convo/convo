@@ -1,35 +1,69 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaBars, FaMoon, FaSun, FaUser, FaEnvelope, FaCamera, FaSignOutAlt } from "react-icons/fa";
 import Sidebar from "../components/sidebar";
 import Header from "../components/Header";
 import MobileNavbar from "../components/mobile-navbar";
-<<<<<<< Updated upstream
-import { FaBars, FaMoon, FaSun } from "react-icons/fa";
-=======
-import { motion, AnimatePresence } from "framer-motion";
->>>>>>> Stashed changes
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
+  const location = useLocation();
   const navigate = useNavigate();
-
-  // Initialize user state with prop or localStorage
-  const [user, setUser] = useState(() => {
-    return propUser || JSON.parse(localStorage.getItem("user")) || {};
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [showMobileNav, setShowMobileNav] = useState(false);
+  const [user, setUser] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    profilePic: "",
   });
 
-  const [imageSrc, setImageSrc] = useState(user?.profileImage || null);
+  const [imageSrc, setImageSrc] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("profile");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Update user state when prop changes
   useEffect(() => {
-    if (propUser) {
-      setUser(propUser);
-      setImageSrc(propUser.profileImage || null);
-    }
-  }, [propUser]);
+    const loadUserData = async () => {
+      try {
+        // Try to get user data from localStorage first
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+          setFormData({
+            fullName: userData.username,
+            email: userData.email,
+            profilePic: userData.profileImage,
+          });
+          setImageSrc(userData.profileImage);
+        } else if (propUser) {
+          setUser(propUser);
+          setFormData({
+            fullName: propUser.username,
+            email: propUser.email,
+            profilePic: propUser.profileImage,
+          });
+          setImageSrc(propUser.profileImage);
+        } else {
+          navigate("/signin");
+        }
+      } catch (err) {
+        console.error("Error loading user data:", err);
+        navigate("/signin");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, [navigate, propUser]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -45,31 +79,63 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
     }
   }, [isMobile]);
 
-  
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+    setIsSaving(true);
+
+    try {
+      // Update user data in localStorage
+      const updatedUser = {
+        ...user,
+        username: formData.fullName,
+        email: formData.email,
+        profileImage: formData.profilePic,
+      };
+      setUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+      setSuccess("Profile updated successfully!");
+    } catch (err) {
+      setError(err.message || "Failed to update profile");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    onLogout();
+    navigate("/signin");
+  };
+
   const handleDeletePhoto = () => {
-    // Use a more subtle confirmation approach
     if (window.confirm("Are you sure you want to delete your profile photo?")) {
       const updated = { ...user, profileImage: null };
       localStorage.setItem("user", JSON.stringify(updated));
       setUser(updated);
       setImageSrc(null);
+      setFormData(prev => ({ ...prev, profilePic: null }));
     }
   };
 
   const handleChangePhoto = () => {
-    // Create a hidden file input element
     const input = document.createElement("input");
     input.type = "file";
     input.accept = "image/*";
-    input.style.display = "none"; // Hide the input element
+    input.style.display = "none";
     
-    // Add the input to the document body
     document.body.appendChild(input);
-    
-    // Trigger the file selection dialog
     input.click();
     
-    // Handle the file selection
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -79,11 +145,11 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
           localStorage.setItem("user", JSON.stringify(updated));
           setUser(updated);
           setImageSrc(e.target.result);
+          setFormData(prev => ({ ...prev, profilePic: e.target.result }));
         };
         reader.readAsDataURL(file);
       }
       
-      // Remove the input element from the document
       document.body.removeChild(input);
     };
   };
@@ -93,15 +159,11 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   };
 
   const handleEditClick = () => {
-    // Log the user data to debug
-    console.log("User data being passed to edit:", user);
-    
-    // Make sure we're passing the complete user object
     navigate("/edit-profile", { 
       state: { 
         localUser: {
           ...user,
-          email: user.email || "", // Ensure email is included
+          email: user.email || "",
           username: user.username || "",
           profileImage: user.profileImage || null
         } 
@@ -133,7 +195,6 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   };
 
   return (
-<<<<<<< Updated upstream
     <div className="flex flex-col bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen overflow-hidden">
       <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in">
         <div className="flex justify-between items-center pr-4 pl-4 pt-2 pb-2">
@@ -218,52 +279,7 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
           </button>
         </div>
       </header>
-
-      {isMobile && isMobileMenuOpen && (
-        <MobileNavbar
-          activePage={activePage}
-          setActivePage={handleNavigation}
-          user={user}
-          onLogout={onLogout}
-=======
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <Header
-          isMobile={isMobile}
-          darkMode={darkMode}
-          toggleDarkMode={toggleDarkMode}
-          toggleMobileMenu={toggleMobileMenu}
->>>>>>> Stashed changes
-        />
-      </motion.header>
-
-      <AnimatePresence>
-        {isMobile && isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10"
-          >
-            <MobileNavbar
-              activePage={activePage}
-              setActivePage={handleNavigation}
-              user={updatedUser}
-              onLogout={onLogout}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex flex-1">
-<<<<<<< Updated upstream
-        <div className="hidden md:block md:w-20 bg-indigo-800 dark:bg-slate-800 m-1 rounded-4xl">
-=======
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -271,7 +287,6 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.3 }}
           className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
         >
->>>>>>> Stashed changes
           <Sidebar
             activePage={activePage}
             setActivePage={handleNavigation}
@@ -280,135 +295,88 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
           />
         </motion.div>
 
-<<<<<<< Updated upstream
         <div className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in">
-=======
-        {/* Main Content */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.3 }}
-          className="flex-1 overflow-y-auto p-4 md:p-8"
-        >
->>>>>>> Stashed changes
-          <div className="max-w-4xl mx-auto">
-            <motion.h1
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="text-2xl font-bold mb-6 text-gray-800 dark:text-white"
-            >
-              Profile
-            </motion.h1>
-
-            {isLoading ? (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="flex justify-center items-center h-64"
-              >
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700"></div>
-              </motion.div>
-            ) : (
-<<<<<<< Updated upstream
-              <div className="bg-gradient-to-br from-indigo-100 via-white to-indigo-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md">
-=======
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
+          {/* Main Content */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+            className="flex-1 overflow-y-auto p-4 md:p-8"
+          >
+            <div className="max-w-4xl mx-auto">
+              <motion.h1
+                initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.2 }}
-                className="bg-gradient-to-br from-indigo-100 via-white to-indigo-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md"
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="text-2xl font-bold mb-6 text-gray-800 dark:text-white"
               >
->>>>>>> Stashed changes
-                <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full mx-auto mb-6">
-                  <div className="w-full h-full rounded-full bg-indigo-100 text-indigo-800 flex items-center justify-center border-4 border-indigo-700 shadow-lg overflow-hidden">
-                    {imageSrc ? (
-                      <img src={imageSrc} alt="Profile" className="w-full h-full object-cover" />
-                    ) : (
-<<<<<<< Updated upstream
-                      <span className="text-4xl font-bold">{user?.username?.charAt(0)?.toUpperCase()}</span>
-=======
-                      <span className="text-4xl font-bold">{updatedUser?.username?.charAt(0)?.toUpperCase()}</span>
->>>>>>> Stashed changes
-                    )}
-                  </div>
-                  <button
-                    onClick={handleChangePhoto}
-                    className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out"
-<<<<<<< Updated upstream
-                    title="Change Photo"
-=======
->>>>>>> Stashed changes
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                  </button>
-                </div>
+                Profile
+              </motion.h1>
 
-                <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-<<<<<<< Updated upstream
-                  {user?.username || "Unknown User"}
-                </h2>
-                <p className="text-gray-500 dark:text-gray-300 mb-6">
-                  {user?.email || "No email available"}
-                </p>
-
-                <div className="flex justify-center gap-4 flex-wrap">
-                  {imageSrc && (
+              {isLoading ? (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex justify-center items-center h-64"
+                >
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700"></div>
+                </motion.div>
+              ) : (
+                <div className="bg-gradient-to-br from-indigo-100 via-white to-indigo-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md">
+                  <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full mx-auto mb-6">
+                    <div className="w-full h-full rounded-full bg-indigo-100 text-indigo-800 flex items-center justify-center border-4 border-indigo-700 shadow-lg overflow-hidden">
+                      {imageSrc ? (
+                        <img src={imageSrc} alt="Profile" className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-4xl font-bold">{user?.username?.charAt(0)?.toUpperCase()}</span>
+                      )}
+                    </div>
                     <button
-                      className="px-6 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
-                      onClick={handleDeletePhoto}
-                      title="Delete Profile Photo"
+                      onClick={handleChangePhoto}
+                      className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out"
+                      title="Change Photo"
                     >
-                      Delete Photo
+                      Change Photo
                     </button>
-                  )}
-                  <button
-                    className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
-                    onClick={handleEditClick}
-                    title="Edit Profile"
-=======
-                  {updatedUser?.username || "Unknown User"}
-                </h2>
-                <p className="text-gray-500 dark:text-gray-300 mb-6">
-                  {updatedUser?.email || "No email available"}
-                </p>
+                  </div>
+                  <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-white">
+                    {user?.username || "Unknown User"}
+                  </h2>
+                  <p className="text-gray-500 dark:text-gray-300 mb-6">
+                    {user?.email || "No email available"}
+                  </p>
 
-                <div className="flex justify-center gap-4 flex-wrap">
-                  <button
-                    className="px-6 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
-                    onClick={handleDeletePhoto}
-                  >
-                    Delete Photo
-                  </button>
-                  <button
-                    className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
-                    onClick={handleEditClick}
->>>>>>> Stashed changes
-                  >
-                    Edit Profile
-                  </button>
-                  <button
-                    className="px-6 py-2 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold shadow-md transition-all duration-300 ease-in-out"
-                    onClick={handleClose}
-<<<<<<< Updated upstream
-                    title="Close"
-=======
->>>>>>> Stashed changes
-                  >
-                    Close
-                  </button>
+                  <div className="flex justify-center gap-4 flex-wrap">
+                    {imageSrc && (
+                      <button
+                        className="px-6 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
+                        onClick={handleDeletePhoto}
+                        title="Delete Profile Photo"
+                      >
+                        Delete Photo
+                      </button>
+                    )}
+                    <button
+                      className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
+                      onClick={handleEditClick}
+                      title="Edit Profile"
+                    >
+                      Edit Profile
+                    </button>
+                    <button
+                      className="px-6 py-2 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold shadow-md transition-all duration-300 ease-in-out"
+                      onClick={handleClose}
+                      title="Close"
+                    >
+                      Close
+                    </button>
+                  </div>
                 </div>
-<<<<<<< Updated upstream
-              </div>
-=======
-              </motion.div>
->>>>>>> Stashed changes
-            )}
-          </div>
-        </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );

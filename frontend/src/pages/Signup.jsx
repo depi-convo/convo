@@ -1,22 +1,12 @@
 import { useState, useEffect } from "react"
-<<<<<<< Updated upstream
-import { Link, useNavigate } from "react-router-dom"
-import { FaEye, FaEyeSlash } from "react-icons/fa"
-import { motion } from "framer-motion"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-=======
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock, FaUser } from "react-icons/fa"
 import { motion, AnimatePresence } from "framer-motion"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-
->>>>>>> Stashed changes
 import Header from "../components/Header"
-import { signupUser } from "../api";
+import { signupUser } from "../api"
 
 const AnimatedBackground = ({ darkMode }) => {
   const [windowSize, setWindowSize] = useState({
@@ -102,124 +92,76 @@ const AnimatedBackground = ({ darkMode }) => {
   )
 }
 
-<<<<<<< Updated upstream
 const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
-  const [username, setUsername] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-=======
-const Signup = ({  darkMode, toggleDarkMode }) => {
   const location = useLocation()
   const [name, setName] = useState("")
   const [email, setEmail] = useState(location.state?.email || "")
   const [password, setPassword] = useState(location.state?.password || "")
   const [confirmPassword, setConfirmPassword] = useState("")
-
->>>>>>> Stashed changes
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError("")
     setIsLoading(true)
 
-<<<<<<< Updated upstream
-    if (!username || !email || !password || !confirmPassword) {
-=======
     if (!name || !email || !password || !confirmPassword) {
->>>>>>> Stashed changes
       setError("All fields required")
       setIsLoading(false)
       return
     }
 
     if (password !== confirmPassword) {
-<<<<<<< Updated upstream
-      setError("The passwords do not match")
+      setError("Passwords do not match")
       setIsLoading(false)
       return
     }
 
     if (password.length < 6) {
       setError("The password should be at least 6 characters")
-=======
-      setError("Passwords do not match")
->>>>>>> Stashed changes
       setIsLoading(false)
       return
     }
 
-<<<<<<< Updated upstream
     try {
       // Try to use the signupUser API function first
       try {
-        signupUser({ fullName: username, email, password })
-          .then(response => {
-            const userData = {
-              id: response._id || 1,
-              username: response.fullName || username,
-              email: response.email,
-              profileImage: response.profilePic || "https://randomuser.me/api/portraits/women/44.jpg",
-            }
-            
-            onLogin(userData)
-            setIsLoading(false)
-            navigate("/", { state: { user: userData } })
-          })
-          .catch(err => {
-            console.log("API signup failed, using fallback:", err)
-            // If API fails, continue with the fallback approach
-            setTimeout(() => {
-              const userData = {
-                id: 1,
-                username: username,
-                email: email,
-                profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-              }
-      
-              onLogin(userData)
-              setIsLoading(false)
-              navigate("/", { state: { user: userData } })
-            }, 1000)
-          })
+        const response = await signupUser({ fullName: name, email, password })
+        const userData = {
+          id: response._id || 1,
+          username: response.fullName || name,
+          email: response.email,
+          profileImage: response.profilePic || "https://randomuser.me/api/portraits/women/44.jpg",
+        }
+        
+        onLogin(userData)
+        setIsLoading(false)
+        navigate("/", { state: { user: userData } })
       } catch (apiError) {
-        console.log("API signup error:", apiError)
+        console.log("API signup failed, using fallback:", apiError)
         // Fallback approach
-        setTimeout(() => {
-          const userData = {
-            id: 1,
-            username: username,
-            email: email,
-            profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-          }
+        const userData = {
+          id: 1,
+          username: name,
+          email: email,
+          profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
+        }
   
-          onLogin(userData)
-          setIsLoading(false)
-          navigate("/", { state: { user: userData } })
-        }, 1000)
+        localStorage.setItem("user", JSON.stringify(userData))
+        setIsLoading(false)
+        navigate("/signin", { 
+          state: { 
+            email: email,
+            password: password
+          } 
+        })
       }
     } catch (err) {
       setError(err.message || "Signup failed")
       setIsLoading(false)
     }
-=======
-    setTimeout(() => {
-      const userData = {
-        id: 1,
-        username: name,
-        email: email,
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      }
-      localStorage.setItem("user", JSON.stringify(userData))
-      
-      navigate("/signin", { state: { email, password } });
-    
-      setIsLoading(false)
-    }, 1000)
   }
 
   const containerVariants = {
@@ -242,7 +184,6 @@ const Signup = ({  darkMode, toggleDarkMode }) => {
         ease: "easeOut",
       },
     },
->>>>>>> Stashed changes
   }
 
   return (
@@ -288,116 +229,6 @@ const Signup = ({  darkMode, toggleDarkMode }) => {
               )}
             </AnimatePresence>
 
-<<<<<<< Updated upstream
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Username
-              </Label>
-              <Input
-                id="username"
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                placeholder="Choose a username"
-              />
-            </div>
-
-            <div>
-              <Label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                placeholder="Enter your email"
-              />
-            </div>
-
-            <div>
-              <Label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                  placeholder="Create a password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300"
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <Label
-                htmlFor="confirmPassword"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Confirm Password
-              </Label>
-              <Input
-                  id="confirmPassword"
-                  type={showPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                placeholder="Confirm your password"
-                />
-            </div>
-
-            <div className="pt-2">
-              <Button
-                type="submit"
-                className={`w-full py-2 px-4 bg-indigo-700 hover:bg-indigo-800 text-white font-medium rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  isLoading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span className="ml-2">Loading</span>
-                  </div>
-                ) : (
-                  "Sign Up"
-                )}
-              </Button>
-            </div>
-          </form>
-
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-            Already have an account?{" "}
-              <Link
-                to="/signin"
-                className="text-indigo-700 dark:text-blue-400 hover:underline font-medium"
-              >
-               Sign in
-              </Link>
-            </p>
-=======
             <motion.form
               variants={containerVariants}
               initial="hidden"
@@ -568,7 +399,6 @@ const Signup = ({  darkMode, toggleDarkMode }) => {
                 </Link>
               </p>
             </motion.div>
->>>>>>> Stashed changes
           </div>
         </motion.div>
       </div>

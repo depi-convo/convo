@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
 import Header from "../components/Header";
-<<<<<<< Updated upstream
-import { loginUser } from "../api";
-import { motion } from "framer-motion";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-=======
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
->>>>>>> Stashed changes
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { loginUser } from "../api";
 
 const AnimatedBackground = ({ darkMode }) => {
   const [windowSize, setWindowSize] = useState({
@@ -103,7 +97,7 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
   const location = useLocation();
   const [email, setEmail] = useState(location.state?.email || "");
   const [password, setPassword] = useState(location.state?.password || "");
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -119,7 +113,6 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
       return;
     }
 
-<<<<<<< Updated upstream
     try {
       // Try to use the loginUser API function first
       try {
@@ -167,18 +160,6 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
-=======
-    setTimeout(() => {
-      const userData = {
-        id: 1,
-        username: name,
-        email: email,
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      };
-      localStorage.setItem("user", JSON.stringify(userData));
-      onLogin(userData);
-      navigate("/profile", { state: { user: userData } });
->>>>>>> Stashed changes
       setIsLoading(false);
     }
   };
@@ -256,65 +237,6 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
               )}
             </AnimatePresence>
 
-<<<<<<< Updated upstream
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <Label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                placeholder="Enter your email"
-              />
-            </div>
-
-            <div>
-              <Label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300"
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <Button
-                type="submit"
-                className={`w-full py-2 px-4  text-white font-medium rounded-md  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2  bg-indigo-700 hover:bg-indigo-800 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg
- ${
-                  isLoading ? "opacity-70 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white "></div>
-                    <span className="ml-2">Loading</span>
-=======
             <motion.form
               variants={containerVariants}
               initial="hidden"
@@ -332,7 +254,6 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <FaEnvelope className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-indigo-800 dark:group-hover:text-indigo-800 transition-colors" />
->>>>>>> Stashed changes
                   </div>
                   <Input
                     id="email"
@@ -450,3 +371,4 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
 };
 
 export default Signin;
+
