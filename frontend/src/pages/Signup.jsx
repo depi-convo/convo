@@ -4,6 +4,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa"
 import { motion } from "framer-motion"
 
 import Header from "../components/Header"
+import { signupUser } from "../api";
 
 const AnimatedBackground = ({ darkMode }) => {
   const [windowSize, setWindowSize] = useState({
@@ -99,43 +100,33 @@ const Signup = ({  darkMode, toggleDarkMode }) => {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-
-    if (!name || !email || !password || !confirmPassword) {
-      setError("All fields reqired")
-      setIsLoading(false)
-      return
-    }
-
-    if (password !== confirmPassword) {
-      setError(" the passwords not match")
-      setIsLoading(false)
-      return
-    }
-
-    if (password.length < 6) {
-      setError(" the password should be at least 6 character   ")
-      setIsLoading(false)
-      return
-    }
-
-    setTimeout(() => {
-      const userData = {
-        id: 1,
-        username: name,
-        email: email,
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+    try {
+      if (!name || !email || !password || !confirmPassword) {
+        setError("All fields required");
+        setIsLoading(false);
+        return;
       }
-
-      
-      setIsLoading(false)
-      navigate("/profile", { state: { user: userData } })
+      if (password !== confirmPassword) {
+        setError("The passwords do not match");
+        setIsLoading(false);
+        return;
+      }
+      if (password.length < 6) {
+        setError("The password should be at least 6 characters");
+        setIsLoading(false);
+        return;
+      }
+      await signupUser({ fullName: name, email, password });
+      setIsLoading(false);
       navigate("/signin", { state: { email, password } });
-
-    }, 2000)
+    } catch (err) {
+      setError(err.message || "Signup failed");
+      setIsLoading(false);
+    }
   }
 
   return (

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import Header from "../components/Header";
+import { loginUser } from "../api";
 import { motion } from "framer-motion";
 import { Link,useNavigate,useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
@@ -104,29 +105,25 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
   
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setIsLoading(true);
-
-    if (!email || !password) {
-      setError("All fields required");
-      setIsLoading(false);
-      return;
-    }
-
-    setTimeout(() => {
-      const userData = {
-        id: 1,
-        username : name,
-        email: email,
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      };
+    try {
+      if (!email || !password) {
+        setError("All fields required");
+        setIsLoading(false);
+        return;
+      }
+      const userData = await loginUser({ email, password });
       localStorage.setItem("user", JSON.stringify(userData));
       onLogin(userData);
-      navigate("/profile", { state: { user: userData } })
+      navigate("/profile", { state: { user: userData } });
+    } catch (err) {
+      setError(err.message || "Login failed");
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
