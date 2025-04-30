@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link,useNavigate,useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,22 +69,24 @@ const AnimatedBackground = ({ darkMode }) => {
         }}
       />
       {shapes.map((shape) => (
-        <div
-          key={shape.id}
-          className={`
-            absolute opacity-10
-            ${darkMode ? "bg-blue-300" : "bg-blue-600"}
-            ${shape.type === "circle" ? "rounded-full" : "rounded-md"}
-          `}
-          style={{
-            left: shape.x,
-            top: shape.y,
-            width: shape.size,
-            height: shape.size,
-            animation: `float ${shape.animationDuration}s infinite ease-in-out`,
-            animationDelay: `${shape.animationDelay}s`,
-          }}
-        />
+       <div
+       key={shape.id}
+       className={`
+         absolute opacity-10
+         ${darkMode ? "bg-blue-300" : "bg-blue-600"}
+         ${shape.type === "circle" ? "rounded-full" : "rounded-md"}
+       `}
+       style={{
+         left: shape.x,
+         top: shape.y,
+         width: shape.size,
+         height: shape.size,
+         filter: "blur(2px)", // ✅ تم إضافة البلور هنا
+         animation: `float ${shape.animationDuration}s infinite ease-in-out`,
+         animationDelay: `${shape.animationDelay}s`,
+       }}
+     />
+     
       ))}
       <style jsx>{animationKeyframes}</style>
     </div>
@@ -92,11 +94,15 @@ const AnimatedBackground = ({ darkMode }) => {
 };
 
 const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const location = useLocation();
+  
+  const [email, setEmail] = useState(location.state?.email || "");
+  const [password, setPassword] = useState(location.state?.password || "");
+  const [showPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -112,12 +118,13 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
     setTimeout(() => {
       const userData = {
         id: 1,
-        name: "Esraa Karam",
+        username : name,
         email: email,
         avatar: "https://randomuser.me/api/portraits/women/44.jpg",
       };
-
+      localStorage.setItem("user", JSON.stringify(userData));
       onLogin(userData);
+      navigate("/profile", { state: { user: userData } })
       setIsLoading(false);
     }, 1000);
   };
@@ -132,14 +139,16 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
       <AnimatedBackground darkMode={darkMode} />
       <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
-      <div className="flex-1 flex items-center justify-center px-4 mt-16 relative z-10">
+      <div className="flex-1 flex items-center justify-center px-4 mt-16 relative z-10 ">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-md p-8 bg-white/90 dark:bg-slate-800/90 rounded-lg shadow-lg backdrop-blur-sm"
+          className="w-full max-w-md p-8 bg-white/70 dark:bg-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md dark:shadow-blue-900/40 "
+          
         >
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white">
+          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white"
+          >
             login
           </h2>
 
@@ -183,27 +192,22 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                   className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
                   placeholder="Enter your password"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-300"
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
+                
               </div>
             </div>
 
             <div>
               <Button
                 type="submit"
-                className={`w-full py-2 px-4 bg-indigo-700 hover:bg-indigo-800 text-white font-medium rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+                className={`w-full py-2 px-4  text-white font-medium rounded-md  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2  bg-indigo-700 hover:bg-indigo-800 hover:scale-105 transition-all duration-300 shadow-md hover:shadow-lg
+ ${
                   isLoading ? "opacity-70 cursor-not-allowed" : ""
                 }`}
                 disabled={isLoading}
               >
                 {isLoading ? (
                   <div className="flex justify-center items-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white "></div>
                     <span className="ml-2">Loading</span>
                   </div>
                 ) : (

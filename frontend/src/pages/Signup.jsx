@@ -78,6 +78,7 @@ const AnimatedBackground = ({ darkMode }) => {
             top: shape.y,
             width: shape.size,
             height: shape.size,
+            filter: "blur(2px)",
             animation: `float ${shape.animationDuration}s infinite ease-in-out`,
             animationDelay: `${shape.animationDelay}s`,
           }}
@@ -88,12 +89,12 @@ const AnimatedBackground = ({ darkMode }) => {
   )
 }
 
-const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
+const Signup = ({  darkMode, toggleDarkMode }) => {
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
+  const [showPassword] = useState(false)
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
@@ -129,9 +130,11 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
         avatar: "https://randomuser.me/api/portraits/women/44.jpg",
       }
 
-      onLogin(userData)
+      
       setIsLoading(false)
       navigate("/profile", { state: { user: userData } })
+      navigate("/signin", { state: { email, password } });
+
     }, 2000)
   }
 
@@ -150,7 +153,7 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-md p-8 bg-white/90 dark:bg-slate-800/90 rounded-lg shadow-lg backdrop-blur-sm"
+          className="w-full max-w-md p-8 bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-xl backdrop-blur-md dark:shadow-blue-900/40 "
         >
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white"> Sign Up </h2>
 
