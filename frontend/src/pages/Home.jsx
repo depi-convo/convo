@@ -6,7 +6,7 @@ import Sidebar from "../components/sidebar";
 import ChatList from "../components/chat-list";
 import Chatbox from "../components/Chatbox";
 import Welcome from "../components/welcome-screen";
-import { FaBars, FaMoon, FaSun } from "react-icons/fa";
+import { FaBars, FaMoon, FaSun, FaArrowLeft } from "react-icons/fa";
 import MobileNavbar from "../components/mobile-navbar";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -296,6 +296,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.3 }}
           className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
         >
+          
           <Sidebar
             activePage={activePage}
             setActivePage={handleNavigation}
