@@ -22,8 +22,12 @@ function App() {
     // Check if user is logged in from localStorage
     const user = localStorage.getItem("user");
     if (user) {
-      setCurrentUser(JSON.parse(user)); // get user data from localstorage change it to object and keep it in current user
-      setIsAuthenticated(true);
+      const userData = JSON.parse(user);
+      // Only set as authenticated if the user is not marked as logged out
+      if (!userData.isLoggedOut) {
+        setCurrentUser(userData);
+        setIsAuthenticated(true);
+      }
     }
 
     // Check dark mode preference
@@ -52,15 +56,37 @@ function App() {
 
   // When the user logs in, their data is saved and their status is updated.
   const handleLogin = (userData) => {
-    setCurrentUser(userData);
+    // Check if we have existing user data in localStorage
+    const existingUserData = localStorage.getItem("user");
+    let finalUserData = userData;
+    
+    if (existingUserData) {
+      const existingUser = JSON.parse(existingUserData);
+      // If we have existing data, merge it with the new login data
+      // This preserves profile picture and other settings
+      finalUserData = {
+        ...userData,
+        profileImage: existingUser.profileImage || userData.profileImage,
+        // Add any other fields you want to preserve
+      };
+    }
+    
+    setCurrentUser(finalUserData);
     setIsAuthenticated(true);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(finalUserData));
   };
   // same for logout
   const handleLogout = () => {
+    // Instead of removing the user data completely, just mark as logged out
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const user = JSON.parse(userData);
+      // Keep the user data but mark as logged out
+      localStorage.setItem("user", JSON.stringify({...user, isLoggedOut: true}));
+    }
+    
     setCurrentUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem("user");
   };
 
   return (
@@ -146,14 +172,13 @@ function App() {
             }
           />
 
-...
           <Route
             path="/edit-profile"
             element={
               isAuthenticated ? (
                 <EditProfile
                   user={currentUser}
-                setUser={setCurrentUser}
+                  setUser={setCurrentUser}
                   onLogout={handleLogout}
                   darkMode={darkMode}
                   toggleDarkMode={toggleDarkMode}
@@ -163,9 +188,6 @@ function App() {
               )
             }
           />
-
-       
-           <Route path="/edit-profile" element={<EditProfile />} />
 
           <Route
             path="*"

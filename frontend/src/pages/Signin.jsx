@@ -110,12 +110,29 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
     }
 
     setTimeout(() => {
-      const userData = {
-        id: 1,
-        name: "Esraa Karam",
-        email: email,
-        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      };
+      // Check if we have existing user data in localStorage
+      const existingUserData = localStorage.getItem("user");
+      let userData;
+      
+      if (existingUserData) {
+        const existingUser = JSON.parse(existingUserData);
+        // If we have existing data, use it but update with current login info
+        userData = {
+          ...existingUser,
+          email: email,
+          isLoggedOut: false, // Mark as logged in
+        };
+      } else {
+        // Extract username from email (everything before the @ symbol)
+        const usernameFromEmail = email.split('@')[0];
+        
+        userData = {
+          id: 1,
+          username: usernameFromEmail,
+          email: email,
+          profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
+        };
+      }
 
       onLogin(userData);
       setIsLoading(false);

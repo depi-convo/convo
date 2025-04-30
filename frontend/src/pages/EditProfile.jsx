@@ -2,20 +2,43 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaBars, FaMoon, FaSun } from 'react-icons/fa';
 import Sidebar from '../components/sidebar';
+import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
 
-const EditProfile = ({ onLogout, darkMode, toggleDarkMode }) => {
+const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode, toggleDarkMode }) => {
   const location = useLocation();
   const navigate = useNavigate();
   
-  // Check if data exist in location or localStorage
-  const storedUser = JSON.parse(localStorage.getItem('user')) || {};
-  const user = location.state?.localUser || storedUser;
-
-  const [name, setName] = useState(user?.username || '');
+  // Get user data from props, location state, or localStorage
+  const initialUser = propUser || location.state?.localUser || JSON.parse(localStorage.getItem('user')) || {};
+  
+  // Log the user data to debug
+  console.log("Initial user data:", initialUser);
+  
+  const [name, setName] = useState(initialUser.username || "");
+  const [email, setEmail] = useState(initialUser.email || "");
   const [picture, setPicture] = useState(null);
-  const [preview, setPreview] = useState(user?.profileImage || '');
+  const [preview, setPreview] = useState(initialUser?.profileImage || '');
   const [activePage, setActivePage] = useState("profile");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  // Update form when propUser changes
+  useEffect(() => {
+    if (propUser) {
+      setName(propUser.username || "");
+      setEmail(propUser.email || "");
+      setPreview(propUser.profileImage || '');
+    }
+  }, [propUser]);
+
+  // Update form when location state changes
+  useEffect(() => {
+    if (location.state?.localUser) {
+      setName(location.state.localUser.username || "");
+      setEmail(location.state.localUser.email || "");
+      setPreview(location.state.localUser.profileImage || '');
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -29,19 +52,25 @@ const EditProfile = ({ onLogout, darkMode, toggleDarkMode }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const updatedProfileImage = picture
-      ? preview
-      : user.profileImage || '';
-
+    
+    // Create updated user object
     const updatedUser = {
+      ...initialUser,
       username: name,
-      profileImage: updatedProfileImage,
+      email: email,
+      profileImage: picture ? preview : initialUser.profileImage || '',
     };
-
+   
     // Save updated user to localStorage
     localStorage.setItem('user', JSON.stringify(updatedUser));
+    
+    // Update the user in the parent component if setUser is provided
+    if (setPropUser) {
+      setPropUser(updatedUser);
+    }
 
-    navigate("/profile", { state: { updatedUser } });
+    // Navigate back to profile page
+    navigate("/profile");
   };
 
   const handleClose = () => {
@@ -139,7 +168,7 @@ const EditProfile = ({ onLogout, darkMode, toggleDarkMode }) => {
                   navigate("/");
               }
             }}
-            user={user}
+            user={initialUser}
             onLogout={onLogout}
           />
         </div>
@@ -156,6 +185,25 @@ const EditProfile = ({ onLogout, darkMode, toggleDarkMode }) => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md dark:bg-slate-700 dark:border-slate-600 dark:text-white"
+              />
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              >
+                Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-slate-700 dark:text-white"
+                placeholder="Enter your email"
+                required
               />
             </div>
 
@@ -182,21 +230,20 @@ const EditProfile = ({ onLogout, darkMode, toggleDarkMode }) => {
 
             {/* Buttons */}
             <div className="flex justify-center gap-4">
-  <button
-    type="submit"
-    className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
-  >
-    Save Changes
-  </button>
-  <button
-    type="button"
-    onClick={handleClose}
-    className="px-6 py-2 rounded-full bg-gray-400 hover:bg-gray-500 text-gray-800 font-semibold shadow-md transition-all duration-300 ease-in-out"
-  >
-    Cancel
-  </button>
-</div>
-
+              <button
+                type="submit"
+                className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
+              >
+                Save Changes
+              </button>
+              <button
+                type="button"
+                onClick={handleClose}
+                className="px-6 py-2 rounded-full bg-gray-400 hover:bg-gray-500 text-gray-800 font-semibold shadow-md transition-all duration-300 ease-in-out"
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         </div>
       </div>
