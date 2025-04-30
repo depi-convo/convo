@@ -112,17 +112,13 @@ function App() {
             }
           />
           <Route
-            path="/signup"
-            element={
-              isAuthenticated ? (
-                <Navigate to="/" />
-              ) : (
+           path="/signup" element={  
                 <Signup
                   onLogin={handleLogin}
                   darkMode={darkMode}
                   toggleDarkMode={toggleDarkMode}
                 />
-              )
+              
             }
           />
           <Route

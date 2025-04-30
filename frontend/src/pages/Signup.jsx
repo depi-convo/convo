@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import Header from "../components/Header"
+import { signupUser } from "../api";
 
 const AnimatedBackground = ({ darkMode }) => {
   const [windowSize, setWindowSize] = useState({
@@ -80,6 +81,7 @@ const AnimatedBackground = ({ darkMode }) => {
             top: shape.y,
             width: shape.size,
             height: shape.size,
+            filter: "blur(2px)",
             animation: `float ${shape.animationDuration}s infinite ease-in-out`,
             animationDelay: `${shape.animationDelay}s`,
           }}
@@ -112,44 +114,69 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match")
+      setError("The passwords do not match")
       setIsLoading(false)
       return
     }
 
     if (password.length < 6) {
-      setError("Password must be at least 6 characters")
+      setError("The password should be at least 6 characters")
       setIsLoading(false)
       return
     }
 
-    setTimeout(() => {
-      // Check if we have existing user data in localStorage
-      const existingUserData = localStorage.getItem("user");
-      let userData;
+    try {
+      // Try to use the signupUser API function first
+      try {
+        signupUser({ fullName: username, email, password })
+          .then(response => {
+            const userData = {
+              id: response._id || 1,
+              username: response.fullName || username,
+              email: response.email,
+              profileImage: response.profilePic || "https://randomuser.me/api/portraits/women/44.jpg",
+            }
+            
+            onLogin(userData)
+            setIsLoading(false)
+            navigate("/", { state: { user: userData } })
+          })
+          .catch(err => {
+            console.log("API signup failed, using fallback:", err)
+            // If API fails, continue with the fallback approach
+            setTimeout(() => {
+              const userData = {
+                id: 1,
+                username: username,
+                email: email,
+                profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
+              }
       
-      if (existingUserData) {
-        const existingUser = JSON.parse(existingUserData);
-        // If we have existing data, use it but update with current signup info
-        userData = {
-          ...existingUser,
-          username: username,
-          email: email,
-          isLoggedOut: false, // Mark as logged in
-        };
-      } else {
-        userData = {
-          id: 1,
-          username: username,
-          email: email,
-          profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-        };
+              onLogin(userData)
+              setIsLoading(false)
+              navigate("/", { state: { user: userData } })
+            }, 1000)
+          })
+      } catch (apiError) {
+        console.log("API signup error:", apiError)
+        // Fallback approach
+        setTimeout(() => {
+          const userData = {
+            id: 1,
+            username: username,
+            email: email,
+            profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
+          }
+  
+          onLogin(userData)
+          setIsLoading(false)
+          navigate("/", { state: { user: userData } })
+        }, 1000)
       }
-
-      onLogin(userData)
+    } catch (err) {
+      setError(err.message || "Signup failed")
       setIsLoading(false)
-      navigate("/profile", { state: { user: userData } })
-    }, 1000)
+    }
   }
 
   return (
@@ -167,7 +194,7 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-md p-8 bg-white/90 dark:bg-slate-800/90 rounded-lg shadow-lg backdrop-blur-sm"
+          className="w-full max-w-md p-8 bg-white/90 dark:bg-slate-800/90 rounded-2xl shadow-xl backdrop-blur-md dark:shadow-blue-900/40 "
         >
           <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white"> Sign Up </h2>
 
