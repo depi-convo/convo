@@ -4,6 +4,7 @@ import Sidebar from "../components/sidebar";
 import { FaPlus } from "react-icons/fa";
 import MobileNavbar from "../components/mobile-navbar"
 import { FaBars, FaMoon, FaSun } from "react-icons/fa"
+import { motion, AnimatePresence } from "framer-motion";
 
 const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
@@ -105,7 +106,12 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
 
   return (
     <div className="flex flex-col  bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen">
-     <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in ">
+     <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white dark:bg-slate-800 shadow-md z-10"
+      >
         <div className="flex justify-between items-center  pr-4 pl-4 pt-2 pb-2">
           {isMobile ? (
             <button onClick={toggleMobileMenu} className="p-2 rounded-full mr-2">
@@ -183,75 +189,118 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             />
           </button>
         </div>
-      </header>
+      </motion.header>
       
       {/* Mobile Navigation Menu */}
-      {isMobile && isMobileMenuOpen && (
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <MobileNavbar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout}></MobileNavbar>
-        </div>
-      )}
+      <AnimatePresence>
+        {isMobile && isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10"
+          >
+            <MobileNavbar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout}></MobileNavbar>
+          </motion.div>
+        )}
+      </AnimatePresence>
      
       {/* Main Content */}
 
       <div className="flex flex-1  ">
         {/* Sidebar - fixed width */}
-        <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-800 rounded-4xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
+        >
           <Sidebar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout} />
-        </div>
+        </motion.div>
 
 
 
-        <div className="max-w-4xl mx-auto p-10">
-          <div className="flex justify-between items-center mb-6">
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="max-w-4xl mx-auto p-10"
+        >
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.1 }}
+            className="flex justify-between items-center mb-6"
+          >
             <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
               Channels
             </h1>
             <div className="flex gap-4">
              
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowForm(!showForm)}
                 className="flex items-center gap-2 bg-indigo-700  hover:bg-indigo-800  text-white font-semibold px-4 py-2 rounded-full shadow"
               >
                 <FaPlus /> Create Channel
-              </button>
+              </motion.button>
             </div>
-          </div>
+          </motion.div>
 
           {/* Create Channel Form */}
-          {showForm && (
-            <div className="mb-6 space-y-2 bg-white dark:bg-slate-800 p-4 rounded-lg shadow">
-              <input
-                type="text"
-                placeholder="Channel Name"
-                className="w-full p-2 border rounded"
-                value={newChannel.name}
-                onChange={(e) =>
-                  setNewChannel({ ...newChannel, name: e.target.value })
-                }
-              />
-              <input
-                type="text"
-                placeholder="Description"
-                className="w-full p-2 border rounded"
-                value={newChannel.description}
-                onChange={(e) =>
-                  setNewChannel({ ...newChannel, description: e.target.value })
-                }
-              />
-              <button
-                onClick={handleAddChannel}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+          <AnimatePresence>
+            {showForm && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 space-y-2 bg-white dark:bg-slate-800 p-4 rounded-lg shadow overflow-hidden"
               >
-                Add Channel
-              </button>
-            </div>
-          )}
+                <input
+                  type="text"
+                  placeholder="Channel Name"
+                  className="w-full p-2 border rounded"
+                  value={newChannel.name}
+                  onChange={(e) =>
+                    setNewChannel({ ...newChannel, name: e.target.value })
+                  }
+                />
+                <input
+                  type="text"
+                  placeholder="Description"
+                  className="w-full p-2 border rounded"
+                  value={newChannel.description}
+                  onChange={(e) =>
+                    setNewChannel({ ...newChannel, description: e.target.value })
+                  }
+                />
+                <button
+                  onClick={handleAddChannel}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
+                >
+                  Add Channel
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {channels.map((channel) => (
-              <div
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+          >
+            {channels.map((channel, index) => (
+              <motion.div
                 key={channel.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 className="bg-white dark:bg-slate-800 rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer"
                 onClick={() => handleChannelClick(channel.id)}
               >
@@ -283,10 +332,10 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                     {channel.joined ? "Leave" : "Join"}
                   </button>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

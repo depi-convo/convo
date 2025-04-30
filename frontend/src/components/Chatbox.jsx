@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
-import { FaPaperclip, FaSmile, FaMicrophone, FaStop } from "react-icons/fa";
+import { FaPaperclip, FaSmile, FaMicrophone, FaStop, FaSearch, FaTimes } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react"; // ايموجي بيكر
+import { motion, AnimatePresence } from "framer-motion";
 
 const Chatbox = ({ user }) => {
   const [messages, setMessages] = useState([
@@ -26,6 +27,11 @@ const Chatbox = ({ user }) => {
   ]);
 
   const [input, setInput] = useState("");
+  const [isOtherTyping, setIsOtherTyping] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [highlightedMessage, setHighlightedMessage] = useState(null);
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -33,6 +39,51 @@ const Chatbox = ({ user }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const scrollRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const notificationSound = useRef(new Audio("/notification.mp3"));
+
+  // Simulate other person typing
+  useEffect(() => {
+    const typingInterval = setInterval(() => {
+      if (Math.random() > 0.7) { // 30% chance of typing
+        setIsOtherTyping(true);
+        setTimeout(() => {
+          setIsOtherTyping(false);
+        }, 2000);
+      }
+    }, 5000);
+
+    return () => clearInterval(typingInterval);
+  }, []);
+
+  // Search functionality
+  useEffect(() => {
+    if (searchQuery.trim()) {
+      const results = messages.filter(message =>
+        message.text.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setSearchResults(results);
+      
+      // Highlight the first result
+      if (results.length > 0) {
+        setHighlightedMessage(results[0]);
+        // Scroll to the highlighted message
+        const messageElement = document.getElementById(`message-${results[0].timestamp}`);
+        if (messageElement) {
+          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    } else {
+      setSearchResults([]);
+      setHighlightedMessage(null);
+    }
+  }, [searchQuery, messages]);
+
+  // Play notification sound for new messages
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].sender === "other") {
+      notificationSound.current.play().catch(error => console.log("Error playing sound:", error));
+    }
+  }, [messages]);
 
   const handleInputChange = (e) => setInput(e.target.value);
 
@@ -105,95 +156,212 @@ const Chatbox = ({ user }) => {
   const formatDate = (date) => date.toLocaleDateString();
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-slate-800 transition-colors duration-300 overflow-hidden">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className="flex flex-col h-full bg-white dark:bg-slate-800 transition-colors duration-300 overflow-hidden"
+    >
       {/* Header */}
-      <div className="flex items-center p-3 border-b border-gray-200 dark:border-slate-700">
-        <div className="relative flex-shrink-0">
-          <img
-            src={user.avatar || "/placeholder.svg"}
-            alt={user.name}
-            className="w-10 h-10 rounded-full object-cover bg-gray-200"
-          />
-          {user.isOnline && (
-            <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-slate-800"></div>
-          )}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.2 }}
+        className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-slate-700"
+      >
+        <div className="flex items-center">
+          <div className="relative flex-shrink-0">
+            <motion.img
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3 }}
+              src={user.avatar || "/placeholder.svg"}
+              alt={user.name}
+              className="w-10 h-10 rounded-full object-cover bg-gray-200"
+            />
+            {user.isOnline && (
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-white dark:border-slate-800"
+              />
+            )}
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="ml-3 min-w-0"
+          >
+            <Label className="font-medium text-gray-900 dark:text-white truncate">
+              {user.name}
+            </Label>
+            <Label className="text-xs text-green-500">
+              {user.isOnline ? "Online" : "Offline"}
+            </Label>
+          </motion.div>
         </div>
-        <div className="ml-3 min-w-0">
-          <Label className="font-medium text-gray-900 dark:text-white truncate">
-            {user.name}
-          </Label>
-          <Label className="text-xs text-green-500">
-            {user.isOnline ? "Online" : "Offline"}
-          </Label>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowSearch(!showSearch)}
+            className="text-gray-600 dark:text-gray-300"
+          >
+            {showSearch ? <FaTimes /> : <FaSearch />}
+          </Button>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Search Bar */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="border-b border-gray-200 dark:border-slate-700"
+          >
+            <div className="p-2">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search in conversation..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-8"
+                />
+                <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+            </div>
+            {searchResults.length > 0 && (
+              <div className="p-2 bg-gray-50 dark:bg-slate-700">
+                <p className="text-sm text-gray-600 dark:text-gray-300">
+                  Found {searchResults.length} results
+                </p>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={cn(
-              "flex flex-col",
-              message.sender === "user" ? "items-end" : "items-start"
-            )}
-          >
-            <div
+        <AnimatePresence>
+          {messages.map((message, index) => (
+            <motion.div
+              key={index}
+              id={`message-${message.timestamp}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
               className={cn(
-                "p-3 rounded-2xl max-w-[75%] md:max-w-[60%] break-words break-all whitespace-pre-wrap text-white shadow-sm transition-all duration-300",
-                message.sender === "user"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-300 text-black"
+                "flex flex-col",
+                message.sender === "user" ? "items-end" : "items-start"
               )}
             >
-              {message.file && message.fileType === "audio" ? (
-                
-                <audio controls src={message.file} className="mb-2 w-40 sm:w-48" />
-              ) : (
-                message.file && (
-                  <>
-                    {message.fileName &&
-                    (message.fileName.endsWith(".png") ||
-                      message.fileName.endsWith(".jpg") ||
-                      message.fileName.endsWith(".jpeg") ||
-                      message.fileName.endsWith(".gif")) ? (
-                      <img
-                        src={message.file}
-                        alt="Uploaded file"
-                        className="rounded-lg mb-2 w-40 h-auto"
-                      />
-                    ) : (
-                      <div className="flex flex-col">
-                        <a
-                          href={message.file}
-                          download={message.fileName}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-200 underline break-all"
-                        >
-                          📄 {message.fileName}
-                        </a>
-                      </div>
-                    )}
-                  </>
-                )
-              )}
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.3 }}
+                className={cn(
+                  "p-3 rounded-2xl max-w-[75%] md:max-w-[60%] break-words break-all whitespace-pre-wrap text-white shadow-sm transition-all duration-300",
+                  message.sender === "user"
+                    ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white"
+                    : "bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-900 dark:text-white",
+                  highlightedMessage === message && "ring-2 ring-indigo-500 ring-offset-2"
+                )}
+              >
+                {message.file && message.fileType === "audio" ? (
+                  <audio controls src={message.file} className="mb-2 w-40 sm:w-48" />
+                ) : (
+                  message.file && (
+                    <>
+                      {message.fileName &&
+                      (message.fileName.endsWith(".png") ||
+                        message.fileName.endsWith(".jpg") ||
+                        message.fileName.endsWith(".jpeg") ||
+                        message.fileName.endsWith(".gif")) ? (
+                        <img
+                          src={message.file}
+                          alt="Uploaded file"
+                          className="rounded-lg mb-2 w-40 h-auto"
+                        />
+                      ) : (
+                        <div className="flex flex-col">
+                          <a
+                            href={message.file}
+                            download={message.fileName}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-200 underline break-all"
+                          >
+                            📄 {message.fileName}
+                          </a>
+                        </div>
+                      )}
+                    </>
+                  )
+                )}
 
-              {message.text}
-              <div className="text-xs text-gray-400 mt-1 flex items-center justify-end">
-                {formatTime(message.timestamp)}
+                {message.text}
+                <div className="text-xs text-gray-400 mt-1 flex items-center justify-end">
+                  {formatTime(message.timestamp)}
+                </div>
+              </motion.div>
+              <p className="text-xs text-gray-400 mt-1">
+                {formatDate(message.timestamp)}
+              </p>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        {/* Typing Indicator */}
+        <AnimatePresence>
+          {isOtherTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-center space-x-2 text-gray-500 dark:text-gray-400 text-sm"
+            >
+              <div className="flex space-x-1">
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity }}
+                  className="w-2 h-2 bg-indigo-500 rounded-full"
+                />
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, delay: 0.1 }}
+                  className="w-2 h-2 bg-indigo-500 rounded-full"
+                />
+                <motion.div
+                  animate={{ y: [0, -4, 0] }}
+                  transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }}
+                  className="w-2 h-2 bg-indigo-500 rounded-full"
+                />
               </div>
-            </div>
-            <p className="text-xs text-gray-400 mt-1">
-              {formatDate(message.timestamp)}
-            </p>
-          </div>
-        ))}
+              <span className="font-medium text-indigo-600 dark:text-indigo-400">
+                {user.name} is typing...
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
         <div ref={scrollRef} />
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t flex flex-row space-x-2 bg-white dark:bg-slate-800 mt-auto justify-center items-center relative">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.3 }}
+        className="p-4 border-t flex flex-row space-x-2 bg-white dark:bg-slate-800 mt-auto justify-center items-center relative"
+      >
         {showEmojiPicker && (
           <div className="absolute bottom-20 left-1/12">
             <EmojiPicker onEmojiClick={handleEmojiClick} theme="light" />
@@ -290,15 +458,37 @@ const Chatbox = ({ user }) => {
         </Button>
 
         {/* Send Button */}
-        <Button
-          variant="send"
-          onClick={handleSendMessage}
-          className="px-4 bg-indigo-600"
+        <motion.div
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          Send
-        </Button>
-      </div>
-    </div>
+          <Button
+            variant="send"
+            onClick={handleSendMessage}
+            className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+          >
+            <span>Send</span>
+            <motion.svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ x: 0 }}
+              animate={{ x: [0, 5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </motion.svg>
+          </Button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

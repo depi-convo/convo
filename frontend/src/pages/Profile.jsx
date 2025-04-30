@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import Header from "../components/Header";
 import MobileNavbar from "../components/mobile-navbar";
+<<<<<<< Updated upstream
 import { FaBars, FaMoon, FaSun } from "react-icons/fa";
+=======
+import { motion, AnimatePresence } from "framer-motion";
+>>>>>>> Stashed changes
 
 const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
@@ -129,6 +133,7 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   };
 
   return (
+<<<<<<< Updated upstream
     <div className="flex flex-col bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen overflow-hidden">
       <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in">
         <div className="flex justify-between items-center pr-4 pl-4 pt-2 pb-2">
@@ -220,41 +225,121 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
           setActivePage={handleNavigation}
           user={user}
           onLogout={onLogout}
+=======
+    <div className="flex flex-col h-screen w-screen overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Header
+          isMobile={isMobile}
+          darkMode={darkMode}
+          toggleDarkMode={toggleDarkMode}
+          toggleMobileMenu={toggleMobileMenu}
+>>>>>>> Stashed changes
         />
-      )}
+      </motion.header>
+
+      <AnimatePresence>
+        {isMobile && isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10"
+          >
+            <MobileNavbar
+              activePage={activePage}
+              setActivePage={handleNavigation}
+              user={updatedUser}
+              onLogout={onLogout}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-1">
+<<<<<<< Updated upstream
         <div className="hidden md:block md:w-20 bg-indigo-800 dark:bg-slate-800 m-1 rounded-4xl">
+=======
+        {/* Sidebar */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
+        >
+>>>>>>> Stashed changes
           <Sidebar
             activePage={activePage}
             setActivePage={handleNavigation}
             user={user}
             onLogout={onLogout}
           />
-        </div>
+        </motion.div>
 
+<<<<<<< Updated upstream
         <div className="flex-1 overflow-y-auto p-4 md:p-8 animate-fade-in">
+=======
+        {/* Main Content */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="flex-1 overflow-y-auto p-4 md:p-8"
+        >
+>>>>>>> Stashed changes
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Profile</h1>
+            <motion.h1
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="text-2xl font-bold mb-6 text-gray-800 dark:text-white"
+            >
+              Profile
+            </motion.h1>
 
             {isLoading ? (
-              <div className="flex justify-center items-center h-64">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center items-center h-64"
+              >
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-700"></div>
-              </div>
+              </motion.div>
             ) : (
+<<<<<<< Updated upstream
               <div className="bg-gradient-to-br from-indigo-100 via-white to-indigo-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md">
+=======
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.2 }}
+                className="bg-gradient-to-br from-indigo-100 via-white to-indigo-100 dark:from-slate-700 dark:via-slate-800 dark:to-slate-700 p-8 rounded-3xl shadow-xl backdrop-blur-md"
+              >
+>>>>>>> Stashed changes
                 <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full mx-auto mb-6">
                   <div className="w-full h-full rounded-full bg-indigo-100 text-indigo-800 flex items-center justify-center border-4 border-indigo-700 shadow-lg overflow-hidden">
                     {imageSrc ? (
                       <img src={imageSrc} alt="Profile" className="w-full h-full object-cover" />
                     ) : (
+<<<<<<< Updated upstream
                       <span className="text-4xl font-bold">{user?.username?.charAt(0)?.toUpperCase()}</span>
+=======
+                      <span className="text-4xl font-bold">{updatedUser?.username?.charAt(0)?.toUpperCase()}</span>
+>>>>>>> Stashed changes
                     )}
                   </div>
                   <button
                     onClick={handleChangePhoto}
                     className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white p-2 rounded-full shadow-lg transition-all duration-300 ease-in-out"
+<<<<<<< Updated upstream
                     title="Change Photo"
+=======
+>>>>>>> Stashed changes
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -263,6 +348,7 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
                 </div>
 
                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+<<<<<<< Updated upstream
                   {user?.username || "Unknown User"}
                 </h2>
                 <p className="text-gray-500 dark:text-gray-300 mb-6">
@@ -283,21 +369,46 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
                     className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
                     onClick={handleEditClick}
                     title="Edit Profile"
+=======
+                  {updatedUser?.username || "Unknown User"}
+                </h2>
+                <p className="text-gray-500 dark:text-gray-300 mb-6">
+                  {updatedUser?.email || "No email available"}
+                </p>
+
+                <div className="flex justify-center gap-4 flex-wrap">
+                  <button
+                    className="px-6 py-2 rounded-full bg-red-500 hover:bg-red-600 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
+                    onClick={handleDeletePhoto}
+                  >
+                    Delete Photo
+                  </button>
+                  <button
+                    className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
+                    onClick={handleEditClick}
+>>>>>>> Stashed changes
                   >
                     Edit Profile
                   </button>
                   <button
                     className="px-6 py-2 rounded-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold shadow-md transition-all duration-300 ease-in-out"
                     onClick={handleClose}
+<<<<<<< Updated upstream
                     title="Close"
+=======
+>>>>>>> Stashed changes
                   >
                     Close
                   </button>
                 </div>
+<<<<<<< Updated upstream
               </div>
+=======
+              </motion.div>
+>>>>>>> Stashed changes
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

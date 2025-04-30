@@ -1,9 +1,15 @@
 import { useState, useEffect } from "react";
 import Header from "../components/Header";
+<<<<<<< Updated upstream
 import { loginUser } from "../api";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+=======
+import { motion, AnimatePresence } from "framer-motion";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { FaEye, FaEyeSlash, FaEnvelope, FaLock } from "react-icons/fa";
+>>>>>>> Stashed changes
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -70,24 +76,23 @@ const AnimatedBackground = ({ darkMode }) => {
         }}
       />
       {shapes.map((shape) => (
-       <div
-       key={shape.id}
-       className={`
-         absolute opacity-10
-         ${darkMode ? "bg-blue-300" : "bg-blue-600"}
-         ${shape.type === "circle" ? "rounded-full" : "rounded-md"}
-       `}
-       style={{
-         left: shape.x,
-         top: shape.y,
-         width: shape.size,
-         height: shape.size,
-         filter: "blur(2px)", // ✅ تم إضافة البلور هنا
-         animation: `float ${shape.animationDuration}s infinite ease-in-out`,
-         animationDelay: `${shape.animationDelay}s`,
-       }}
-     />
-     
+        <div
+          key={shape.id}
+          className={`
+            absolute opacity-10
+            ${darkMode ? "bg-blue-300" : "bg-blue-600"}
+            ${shape.type === "circle" ? "rounded-full" : "rounded-md"}
+          `}
+          style={{
+            left: shape.x,
+            top: shape.y,
+            width: shape.size,
+            height: shape.size,
+            filter: "blur(2px)",
+            animation: `float ${shape.animationDuration}s infinite ease-in-out`,
+            animationDelay: `${shape.animationDelay}s`,
+          }}
+        />
       ))}
       <style jsx>{animationKeyframes}</style>
     </div>
@@ -96,14 +101,12 @@ const AnimatedBackground = ({ darkMode }) => {
 
 const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
   const location = useLocation();
-  
   const [email, setEmail] = useState(location.state?.email || "");
   const [password, setPassword] = useState(location.state?.password || "");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,6 +119,7 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
       return;
     }
 
+<<<<<<< Updated upstream
     try {
       // Try to use the loginUser API function first
       try {
@@ -163,8 +167,42 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
     } catch (err) {
       setError(err.message || "Login failed");
     } finally {
+=======
+    setTimeout(() => {
+      const userData = {
+        id: 1,
+        username: name,
+        email: email,
+        avatar: "https://randomuser.me/api/portraits/women/44.jpg",
+      };
+      localStorage.setItem("user", JSON.stringify(userData));
+      onLogin(userData);
+      navigate("/profile", { state: { user: userData } });
+>>>>>>> Stashed changes
       setIsLoading(false);
     }
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: "easeOut",
+      },
+    },
   };
 
   return (
@@ -177,25 +215,48 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
       <AnimatedBackground darkMode={darkMode} />
       <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
 
-      <div className="flex-1 flex items-center justify-center px-4 mt-16 relative z-10 ">
+      <div className="flex-1 flex items-center justify-center px-4 mt-16 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="w-full max-w-md p-8 bg-white/70 dark:bg-slate-800/80 rounded-2xl shadow-xl backdrop-blur-md dark:shadow-blue-900/40 "
-          
+          className="w-full max-w-md p-8 bg-gradient-to-br from-white via-indigo-50 to-white dark:from-slate-800 dark:via-indigo-900 dark:to-slate-800 rounded-3xl shadow-2xl backdrop-blur-md dark:shadow-indigo-800/40 border border-gray-200/50 dark:border-slate-700/50 relative overflow-hidden"
         >
-          <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-white"
-          >
-            login
-          </h2>
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-800/10 via-indigo-800/10 to-indigo-800/10 dark:from-indigo-800/10 dark:via-indigo-800/10 dark:to-indigo-800/10 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent dark:via-white/5 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-bl from-transparent via-white/5 to-transparent dark:via-white/5 pointer-events-none" />
+          <div className="relative z-10">
+            <motion.h2
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-indigo-800 to-indigo-800 dark:from-white dark:to-white bg-clip-text text-transparent"
+            >
+              Welcome Back
+            </motion.h2>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="text-center text-gray-600 dark:text-gray-400 mb-8"
+            >
+              Sign in to continue to your account
+            </motion.p>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-md text-center">
-              {error}
-            </div>
-          )}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-6 p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-xl text-center border border-red-200 dark:border-red-800/50"
+                >
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
+<<<<<<< Updated upstream
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label
@@ -253,24 +314,134 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
                   <div className="flex justify-center items-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white "></div>
                     <span className="ml-2">Loading</span>
+=======
+            <motion.form
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              onSubmit={handleSubmit}
+              className="space-y-6"
+            >
+              <motion.div variants={itemVariants} className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Email
+                </Label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaEnvelope className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-indigo-800 dark:group-hover:text-indigo-800 transition-colors" />
+>>>>>>> Stashed changes
                   </div>
-                ) : (
-                  "Login"
-                )}
-              </Button>
-            </div>
-          </form>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-800 dark:bg-slate-700/50 dark:text-white transition-all duration-300 group-hover:border-indigo-800 dark:group-hover:border-indigo-800"
+                    placeholder="Enter your email"
+                  />
+                </div>
+              </motion.div>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{" "}
-              <Link
-                to="/signup"
-                className="text-indigo-700 dark:text-blue-400 hover:underline font-medium"
-              >
-                Sign up
-              </Link>
-            </p>
+              <motion.div variants={itemVariants} className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+                >
+                  Password
+                </Label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaLock className="h-5 w-5 text-gray-400 dark:text-gray-500 group-hover:text-indigo-800 dark:group-hover:text-indigo-800 transition-colors" />
+                  </div>
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-800 dark:bg-slate-700/50 dark:text-white transition-all duration-300 group-hover:border-indigo-800 dark:group-hover:border-indigo-800"
+                    placeholder="Enter your password"
+                  />
+                </div>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="pt-4">
+                <Button
+                  type="submit"
+                  whileHover={{ 
+                    scale: 1.02,
+                    boxShadow: "0 10px 25px -5px rgba(79, 70, 229, 0.4), 0 8px 10px -6px rgba(79, 70, 229, 0.2)",
+                    background: "linear-gradient(45deg, #3730a3, #312e81, #3730a3)",
+                    backgroundSize: "200% 200%",
+                    animation: "gradient 3s ease infinite"
+                  }}
+                  whileTap={{ 
+                    scale: 0.98,
+                    boxShadow: "0 5px 15px -5px rgba(79, 70, 229, 0.3)"
+                  }}
+                  className={`w-full py-3 px-4 text-white font-medium rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-800 focus:ring-offset-2 bg-gradient-to-r from-indigo-800 via-indigo-800 to-indigo-800 hover:from-indigo-900 hover:via-indigo-900 hover:to-indigo-900 transition-all duration-300 shadow-lg hover:shadow-xl ${
+                    isLoading ? "opacity-70 cursor-not-allowed" : ""
+                  }`}
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="flex justify-center items-center"
+                    >
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                      />
+                      <span className="ml-2">Loading</span>
+                    </motion.div>
+                  ) : (
+                    <motion.span
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="relative overflow-hidden"
+                    >
+                      <motion.span
+                        initial={{ x: -100, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="relative z-10"
+                      >
+                        Sign In
+                      </motion.span>
+                      <motion.div
+                        initial={{ x: -100 }}
+                        animate={{ x: 100 }}
+                        transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
+                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
+                      />
+                    </motion.span>
+                  )}
+                </Button>
+              </motion.div>
+            </motion.form>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-8 text-center"
+            >
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="text-indigo-800 dark:text-indigo-800 hover:text-indigo-900 dark:hover:text-indigo-900 font-medium transition-colors duration-300"
+                >
+                  Sign up
+                </Link>
+              </p>
+            </motion.div>
           </div>
         </motion.div>
       </div>

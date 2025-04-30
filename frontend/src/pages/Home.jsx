@@ -8,6 +8,7 @@ import Chatbox from "../components/Chatbox";
 import Welcome from "../components/welcome-screen";
 import { FaBars, FaMoon, FaSun } from "react-icons/fa";
 import MobileNavbar from "../components/mobile-navbar";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
@@ -172,9 +173,14 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   };
 
   return (
-    <div className="flex flex-col  bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen overflow-hidden">
-      {/* Header - full width */}
-      <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in   ">
+    <div className="flex flex-col bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen overflow-hidden">
+      {/* Header */}
+      <motion.header
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in"
+      >
         <div className="flex justify-between items-center pr-4 pl-4 pt-2 pb-2 ">
           {isMobile ? (
             <button
@@ -259,59 +265,90 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             />
           </button>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile Navigation Menu */}
-      {isMobile && isMobileMenuOpen && (
-        <div className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10 animate-slide-in-down">
-          <MobileNavbar
-            activePage={activePage}
-            setActivePage={handleNavigation}
-            user={user}
-            onLogout={onLogout}
-          ></MobileNavbar>
-        </div>
-      )}
+      <AnimatePresence>
+        {isMobile && isMobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10"
+          >
+            <MobileNavbar
+              activePage={activePage}
+              setActivePage={handleNavigation}
+              user={user}
+              onLogout={onLogout}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main content area with sidebar and chat */}
-      <div className="flex flex-1 overflow-hidden ">
-        {/* Sidebar - fixed width */}
-        <div className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-800 rounded-4xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700">
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
+        >
           <Sidebar
             activePage={activePage}
             setActivePage={handleNavigation}
             user={user}
             onLogout={onLogout}
           />
-        </div>
+        </motion.div>
 
-        <div className="flex flex-1 ">
-          {/* Chat List - increased width */}
-          <div
-            className={`${selectedChat && isMobile ? "hidden" : "block"} w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-slate-700 h-full overflow-hidden`}
-          >
-            <ChatList
-              chats={chats}
-              onChatSelect={handleChatSelect}
-              selectedChat={selectedChat}
-            />
-          </div>
-
-          {/* Chat or Welcome Screen - reduced width */}
-          <div
-            className={`${!selectedChat && isMobile ? "hidden" : "block"} flex-1 w-full h-full overflow-hidden`}
-          >
-            {selectedChat ? (
-              <Chatbox
-                chat={selectedChat}
-                onSendMessage={handleSendMessage}
-                user={user}
-                isMobile={isMobile}
-              />
-            ) : (
-              <Welcome user={user} />
+        <div className="flex flex-1">
+          {/* Chat List */}
+          <AnimatePresence mode="wait">
+            {(!selectedChat || !isMobile) && (
+              <motion.div
+                key="chat-list"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="w-full md:w-96 flex-shrink-0 border-r border-gray-200 dark:border-slate-700 h-full overflow-hidden"
+              >
+                <ChatList
+                  chats={chats}
+                  onChatSelect={handleChatSelect}
+                  selectedChat={selectedChat}
+                />
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
+
+          {/* Chat or Welcome Screen */}
+          <AnimatePresence mode="wait">
+            {(selectedChat || !isMobile) && (
+              <motion.div
+                key={selectedChat ? "chat" : "welcome"}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="flex-1 w-full h-full overflow-hidden"
+              >
+                {selectedChat ? (
+                  <Chatbox
+                    chat={selectedChat}
+                    onSendMessage={handleSendMessage}
+                    user={user}
+                    isMobile={isMobile}
+                  />
+                ) : (
+                  <Welcome user={user} />
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </div>
