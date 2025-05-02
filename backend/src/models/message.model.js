@@ -3,8 +3,14 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema(
   {
     sender: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+<<<<<<< HEAD
     receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Not required for group messages
     group: { type: mongoose.Schema.Types.ObjectId, ref: "Group" }, // Optional group reference
+=======
+    receiver: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, 
+    group: { type: mongoose.Schema.Types.ObjectId, ref: "Group" }, 
+    channel: { type: mongoose.Schema.Types.ObjectId, ref: "Channel" }, 
+>>>>>>> 508afa5 (Channels/searching Backend)
     content: { type: String, required: true },
     read: { type: Boolean, default: false },
   },

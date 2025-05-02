@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+<<<<<<< HEAD
 import { FaBars, FaMoon, FaSun, FaUser, FaEnvelope, FaCamera, FaSignOutAlt, FaArrowLeft } from "react-icons/fa";
+=======
+import { FaBars, FaMoon, FaSun, FaUser, FaEnvelope, FaCamera, FaSignOutAlt } from "react-icons/fa";
+>>>>>>> 508afa5 (Channels/searching Backend)
 import Sidebar from "../components/sidebar";
 import Header from "../components/Header";
 import MobileNavbar from "../components/mobile-navbar";
@@ -304,6 +308,7 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
             className="flex-1 overflow-y-auto p-4 md:p-8"
           >
             <div className="max-w-4xl mx-auto">
+<<<<<<< HEAD
               <div className="flex items-center mb-6">
                 <button 
                   onClick={() => navigate("/home")}
@@ -320,6 +325,16 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
                   Profile
                 </motion.h1>
               </div>
+=======
+              <motion.h1
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="text-2xl font-bold mb-6 text-gray-800 dark:text-white"
+              >
+                Profile
+              </motion.h1>
+>>>>>>> 508afa5 (Channels/searching Backend)
 
               {isLoading ? (
                 <motion.div
