@@ -100,11 +100,7 @@ export const updateProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { profilePic: uploadResponse.secure_url },
-<<<<<<< HEAD
-      { new: true },
-=======
       { new: true }
->>>>>>> 508afa5 (Channels/searching Backend)
     );
 
     res.status(200).json(updatedUser);
@@ -118,22 +114,12 @@ export const addFriend = async (req, res) => {
   const userId = req.user._id;
   const { friendId } = req.body;
   if (!friendId) return res.status(400).json({ message: "Friend ID required" });
-<<<<<<< HEAD
-  if (userId.toString() === friendId)
-    return res.status(400).json({ message: "Cannot add yourself as friend" });
-=======
   if (userId.toString() === friendId) return res.status(400).json({ message: "Cannot add yourself as friend" });
->>>>>>> 508afa5 (Channels/searching Backend)
   try {
     const user = await User.findById(userId);
     const friend = await User.findById(friendId);
     if (!friend) return res.status(404).json({ message: "Friend not found" });
-<<<<<<< HEAD
-    if (user.friends.includes(friendId))
-      return res.status(400).json({ message: "Already friends" });
-=======
     if (user.friends.includes(friendId)) return res.status(400).json({ message: "Already friends" });
->>>>>>> 508afa5 (Channels/searching Backend)
     user.friends.push(friendId);
     await user.save();
     res.status(200).json({ message: "Friend added" });
@@ -148,14 +134,8 @@ export const removeFriend = async (req, res) => {
   if (!friendId) return res.status(400).json({ message: "Friend ID required" });
   try {
     const user = await User.findById(userId);
-<<<<<<< HEAD
-    if (!user.friends.includes(friendId))
-      return res.status(400).json({ message: "Not in friends list" });
-    user.friends = user.friends.filter((id) => id.toString() !== friendId);
-=======
     if (!user.friends.includes(friendId)) return res.status(400).json({ message: "Not in friends list" });
     user.friends = user.friends.filter(id => id.toString() !== friendId);
->>>>>>> 508afa5 (Channels/searching Backend)
     await user.save();
     res.status(200).json({ message: "Friend removed" });
   } catch (err) {
@@ -167,28 +147,15 @@ export const blockUser = async (req, res) => {
   const userId = req.user._id;
   const { blockId } = req.body;
   if (!blockId) return res.status(400).json({ message: "Block ID required" });
-<<<<<<< HEAD
-  if (userId.toString() === blockId)
-    return res.status(400).json({ message: "Cannot block yourself" });
-=======
   if (userId.toString() === blockId) return res.status(400).json({ message: "Cannot block yourself" });
->>>>>>> 508afa5 (Channels/searching Backend)
   try {
     const user = await User.findById(userId);
     const toBlock = await User.findById(blockId);
     if (!toBlock) return res.status(404).json({ message: "User not found" });
-<<<<<<< HEAD
-    if (user.blocked.includes(blockId))
-      return res.status(400).json({ message: "Already blocked" });
-    user.blocked.push(blockId);
-    // Optionally remove from friends
-    user.friends = user.friends.filter((id) => id.toString() !== blockId);
-=======
     if (user.blocked.includes(blockId)) return res.status(400).json({ message: "Already blocked" });
     user.blocked.push(blockId);
     // Optionally remove from friends
     user.friends = user.friends.filter(id => id.toString() !== blockId);
->>>>>>> 508afa5 (Channels/searching Backend)
     await user.save();
     res.status(200).json({ message: "User blocked" });
   } catch (err) {
@@ -202,14 +169,8 @@ export const unblockUser = async (req, res) => {
   if (!blockId) return res.status(400).json({ message: "Block ID required" });
   try {
     const user = await User.findById(userId);
-<<<<<<< HEAD
-    if (!user.blocked.includes(blockId))
-      return res.status(400).json({ message: "User not blocked" });
-    user.blocked = user.blocked.filter((id) => id.toString() !== blockId);
-=======
     if (!user.blocked.includes(blockId)) return res.status(400).json({ message: "User not blocked" });
     user.blocked = user.blocked.filter(id => id.toString() !== blockId);
->>>>>>> 508afa5 (Channels/searching Backend)
     await user.save();
     res.status(200).json({ message: "User unblocked" });
   } catch (err) {
@@ -220,14 +181,7 @@ export const unblockUser = async (req, res) => {
 export const getFriends = async (req, res) => {
   const userId = req.user._id;
   try {
-<<<<<<< HEAD
-    const user = await User.findById(userId).populate(
-      "friends",
-      "fullName email profilePic",
-    );
-=======
     const user = await User.findById(userId).populate('friends', 'fullName email profilePic');
->>>>>>> 508afa5 (Channels/searching Backend)
     res.status(200).json({ friends: user.friends });
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -237,14 +191,7 @@ export const getFriends = async (req, res) => {
 export const getBlocked = async (req, res) => {
   const userId = req.user._id;
   try {
-<<<<<<< HEAD
-    const user = await User.findById(userId).populate(
-      "blocked",
-      "fullName email profilePic",
-    );
-=======
     const user = await User.findById(userId).populate('blocked', 'fullName email profilePic');
->>>>>>> 508afa5 (Channels/searching Backend)
     res.status(200).json({ blocked: user.blocked });
   } catch (err) {
     res.status(500).json({ message: "Internal Server Error" });
@@ -259,8 +206,6 @@ export const checkAuth = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
-<<<<<<< HEAD
-=======
 
 
 export const getUserByName = async (req,res)=>{
@@ -280,4 +225,3 @@ export const getUserByName = async (req,res)=>{
 
 
 }
->>>>>>> 508afa5 (Channels/searching Backend)

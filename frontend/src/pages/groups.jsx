@@ -1,11 +1,7 @@
 import { useState,useEffect  } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
-<<<<<<< HEAD
-import { FaPlus, FaArrowLeft } from "react-icons/fa";
-=======
 import { FaPlus } from "react-icons/fa";
->>>>>>> 508afa5 (Channels/searching Backend)
 import MobileNavbar from "../components/mobile-navbar"
 import { FaBars, FaMoon, FaSun } from "react-icons/fa"
 import { motion, AnimatePresence } from "framer-motion";
@@ -237,7 +233,6 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             transition={{ duration: 0.3, delay: 0.1 }}
             className="flex justify-between items-center mb-6"
           >
-<<<<<<< HEAD
             <div className="flex items-center">
               <button 
                 onClick={() => navigate("/home")}
@@ -250,22 +245,11 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
               </h1>
             </div>
             <div className="flex gap-4">
-=======
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-              Channels
-            </h1>
-            <div className="flex gap-4">
-             
->>>>>>> 508afa5 (Channels/searching Backend)
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowForm(!showForm)}
-<<<<<<< HEAD
                 className="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold px-4 py-2 rounded-full shadow"
-=======
-                className="flex items-center gap-2 bg-indigo-700  hover:bg-indigo-800  text-white font-semibold px-4 py-2 rounded-full shadow"
->>>>>>> 508afa5 (Channels/searching Backend)
               >
                 <FaPlus /> Create Channel
               </motion.button>
