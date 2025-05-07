@@ -7,6 +7,8 @@ import { connectDB } from "./src/lib/db.js";
 import authRoutes from "./src/routes/auth.route.js";
 import messageRoutes from "./src/routes/message.route.js";
 import groupRoutes from "./src/routes/group.route.js";
+import channelsRoutes from "./src/routes/channel.route.js";
+import cookieParser from "cookie-parser";
 
 // Initialize environment variables
 dotenv.config();
@@ -15,6 +17,7 @@ const PORT = process.env.PORT || 5000;
 // Create Express app
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 // CORS middleware for frontend
 app.use(
@@ -28,6 +31,7 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/groups", groupRoutes);
+app.use("/api/channels", channelsRoutes);
 
 // Create HTTP server
 const server = http.createServer(app);

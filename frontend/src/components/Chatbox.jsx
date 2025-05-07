@@ -9,22 +9,12 @@ import { Textarea } from "./ui/textarea";
 import { FaPaperclip, FaSmile, FaMicrophone, FaStop, FaSearch, FaTimes } from "react-icons/fa";
 import EmojiPicker from "emoji-picker-react"; // ايموجي بيكر
 import { motion, AnimatePresence } from "framer-motion";
+import { sendMessage, sendGroupMessage, getGroupMessages, getConversationMessages } from "../api";
 
-const Chatbox = ({ user }) => {
-  const [messages, setMessages] = useState([
-    {
-      text: "Hey! How are you?",
-      sender: "other",
-      timestamp: new Date("2023-10-26T10:30:00Z"),
-      read: true,
-    },
-    {
-      text: "I'm doing great, thanks!",
-      sender: "user",
-      timestamp: new Date("2023-10-26T10:35:00Z"),
-      read: true,
-    },
-  ]);
+const Chatbox = ({ chat, onSendMessage, user, isMobile }) => {
+  const [messages, setMessages] = useState([]);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [errorMessages, setErrorMessages] = useState(null);
 
   const [input, setInput] = useState("");
   const [isOtherTyping, setIsOtherTyping] = useState(false);
@@ -41,35 +31,47 @@ const Chatbox = ({ user }) => {
   const mediaRecorderRef = useRef(null);
   const notificationSound = useRef(new Audio("/notification.mp3"));
 
-  // Simulate other person typing
+  // Fetch messages from API
   useEffect(() => {
-    const typingInterval = setInterval(() => {
-      if (Math.random() > 0.7) { // 30% chance of typing
-        setIsOtherTyping(true);
-        setTimeout(() => {
-          setIsOtherTyping(false);
-        }, 2000);
+    const fetchMessages = async () => {
+      setLoadingMessages(true);
+      setErrorMessages(null);
+      try {
+        if (chat && chat.id) {
+          console.log("Fetching messages for chat:", chat.id);
+          const data = await getConversationMessages(chat.id);
+          console.log("Received messages:", data);
+          setMessages(data.messages || []);
+        }
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+        setErrorMessages("Failed to load messages");
+      } finally {
+        setLoadingMessages(false);
       }
-    }, 5000);
+    };
+    
+    if (chat && chat.id) fetchMessages();
+    else setLoadingMessages(false);
+  }, [chat]);
 
-    return () => clearInterval(typingInterval);
-  }, []);
-
-  // Search functionality
   useEffect(() => {
     if (searchQuery.trim()) {
-      const results = messages.filter(message =>
-        message.text.toLowerCase().includes(searchQuery.toLowerCase())
+      const results = messages.filter((message) =>
+        message.content?.toLowerCase().includes(searchQuery.toLowerCase())
       );
       setSearchResults(results);
-      
-      // Highlight the first result
+
       if (results.length > 0) {
         setHighlightedMessage(results[0]);
-        // Scroll to the highlighted message
-        const messageElement = document.getElementById(`message-${results[0].timestamp}`);
+        const messageElement = document.getElementById(
+          `message-${results[0]._id}`
+        );
         if (messageElement) {
-          messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          messageElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+          });
         }
       }
     } else {
@@ -78,34 +80,30 @@ const Chatbox = ({ user }) => {
     }
   }, [searchQuery, messages]);
 
-  // Play notification sound for new messages
   useEffect(() => {
-    if (messages.length > 0 && messages[messages.length - 1].sender === "other") {
-      notificationSound.current.play().catch(error => console.log("Error playing sound:", error));
+    if (
+      messages.length > 0 &&
+      messages[messages.length - 1].sender === "other"
+    ) {
+      notificationSound.current
+        .play()
+        .catch((error) => console.log("Error playing sound:", error));
     }
   }, [messages]);
 
   const handleInputChange = (e) => setInput(e.target.value);
 
-  const handleSendMessage = () => {
-    if (input.trim() !== "" || file || audioBlob) {
-      const newMessage = {
-        text: input.trim(),
-        sender: "user",
-        timestamp: new Date(),
-        read: false,
-        file: file
-          ? URL.createObjectURL(file)
-          : audioBlob
-          ? URL.createObjectURL(audioBlob)
-          : null,
-        fileName: file ? file.name : audioBlob ? "Voice Message" : null,
-        fileType: file ? file.type : audioBlob ? "audio" : null,
-      };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
-      setInput("");
-      setFile(null);
-      setAudioBlob(null);
+  const handleSendMessage = async () => {
+    if (input.trim() === "") return;
+    
+    try {
+      if (chat && chat.id) {
+        onSendMessage(chat.id, input.trim());
+        setInput("");
+      }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setErrorMessages("Failed to send message");
     }
   };
 
@@ -150,10 +148,140 @@ const Chatbox = ({ user }) => {
     }
   }, [messages]);
 
-  const formatTime = (date) =>
-    date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+  
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    if (date.toDateString() === today.toDateString()) {
+      return "Today";
+    } else if (date.toDateString() === yesterday.toDateString()) {
+      return "Yesterday";
+    } else {
+      return date.toLocaleDateString(undefined, { 
+        month: 'short', 
+        day: 'numeric',
+        year: date.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+      });
+    }
+  };
 
-  const formatDate = (date) => date.toLocaleDateString();
+  if (loadingMessages) return (
+    <div className="flex justify-center items-center h-full w-full bg-gray-50 dark:bg-slate-900">
+      <div className="text-center">
+        <div className="animate-spin h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+        <p className="text-gray-600 dark:text-gray-300">Loading messages...</p>
+      </div>
+    </div>
+  );
+  
+  if (errorMessages) return (
+    <div className="flex justify-center items-center h-full w-full bg-gray-50 dark:bg-slate-900">
+      <div className="p-5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg max-w-md">
+        <p className="font-bold mb-2">Error</p>
+        <p>{errorMessages}</p>
+      </div>
+    </div>
+  );
+
+  const groupMessagesByDate = () => {
+    const groups = {};
+    
+    messages.forEach(message => {
+      const date = formatDate(message.createdAt);
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(message);
+    });
+    
+    return groups;
+  };
+
+  const isCurrentUser = (senderId) => {
+    return user && (user.id === senderId || user._id === senderId);
+  };
+
+  const renderMessages = () => {
+    if (messages.length === 0) {
+      return (
+        <div className="flex justify-center items-center h-full">
+          <div className="text-center p-6 bg-gray-50 dark:bg-slate-700/30 rounded-lg max-w-md">
+            <p className="text-gray-600 dark:text-gray-300 mb-2">No messages yet</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Send a message to start the conversation</p>
+          </div>
+        </div>
+      );
+    }
+
+    const messageGroups = groupMessagesByDate();
+    
+    return Object.entries(messageGroups).map(([date, msgs]) => (
+      <div key={date} className="mb-6">
+        <div className="flex justify-center mb-4">
+          <div className="px-3 py-1 bg-gray-100 dark:bg-slate-700 rounded-full text-xs text-gray-500 dark:text-gray-400">
+            {date}
+          </div>
+        </div>
+        
+        <div className="space-y-3">
+          {msgs.map((message) => {
+            const fromCurrentUser = isCurrentUser(message.sender);
+            
+            return (
+              <div 
+                key={message._id} 
+                className={`flex ${fromCurrentUser ? 'justify-end' : 'justify-start'} items-end space-x-2`}
+              >
+                {!fromCurrentUser && (
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden">
+                    {chat.avatar ? (
+                      <img src={chat.avatar} alt={chat.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-400 text-xs font-bold">
+                        {chat.name?.charAt(0).toUpperCase() || '?'}
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                <div className={`max-w-[70%] ${!fromCurrentUser && 'ml-2'}`}>
+                  <div 
+                    className={`px-4 py-2 rounded-t-lg ${
+                      fromCurrentUser 
+                        ? 'bg-indigo-600 text-white rounded-bl-lg rounded-br-none' 
+                        : 'bg-gray-200 text-gray-800 dark:bg-slate-700 dark:text-white rounded-br-lg rounded-bl-none'
+                    }`}
+                  >
+                    {message.content}
+                  </div>
+                  
+                  <div className={`flex items-center mt-1 text-xs text-gray-500 ${fromCurrentUser ? 'justify-end' : 'justify-start'}`}>
+                    <span>{formatTime(message.createdAt)}</span>
+                    {fromCurrentUser && (
+                      <span className="ml-2">
+                        {message.read ? (
+                          <span title="Read">✓✓</span>
+                        ) : (
+                          <span title="Sent">✓</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    ));
+  };
 
   return (
     <motion.div
@@ -171,15 +299,21 @@ const Chatbox = ({ user }) => {
       >
         <div className="flex items-center">
           <div className="relative flex-shrink-0">
-            <motion.img
+            <motion.div
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3 }}
-              src={user.avatar || "/placeholder.svg"}
-              alt={user.name}
-              className="w-10 h-10 rounded-full object-cover bg-gray-200"
-            />
-            {user.isOnline && (
+              className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 overflow-hidden"
+            >
+              {chat.avatar ? (
+                <img src={chat.avatar} alt={chat.name} className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-500 dark:text-gray-400 text-xl font-bold">
+                  {chat.name?.charAt(0).toUpperCase() || '?'}
+                </div>
+              )}
+            </motion.div>
+            {chat.isOnline && (
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
@@ -195,10 +329,10 @@ const Chatbox = ({ user }) => {
             className="ml-3 min-w-0"
           >
             <Label className="font-medium text-gray-900 dark:text-white truncate">
-              {user.name}
+              {chat.name}
             </Label>
-            <Label className="text-xs text-green-500">
-              {user.isOnline ? "Online" : "Offline"}
+            <Label className="text-xs text-gray-500 dark:text-gray-400">
+              {chat.isOnline ? "Online" : "Last seen recently"}
             </Label>
           </motion.div>
         </div>
@@ -248,246 +382,35 @@ const Chatbox = ({ user }) => {
       </AnimatePresence>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        <AnimatePresence>
-          {messages.map((message, index) => (
-            <motion.div
-              key={index}
-              id={`message-${message.timestamp}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4 }}
-              className={cn(
-                "flex flex-col",
-                message.sender === "user" ? "items-end" : "items-start"
-              )}
-            >
-              <motion.div
-                initial={{ scale: 0.9 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className={cn(
-                  "p-3 rounded-2xl max-w-[75%] md:max-w-[60%] break-words break-all whitespace-pre-wrap text-white shadow-sm transition-all duration-300",
-                  message.sender === "user"
-                    ? "bg-gradient-to-r from-indigo-600 to-indigo-700 text-white"
-                    : "bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 text-slate-900 dark:text-white",
-                  highlightedMessage === message && "ring-2 ring-indigo-500 ring-offset-2"
-                )}
-              >
-                {message.file && message.fileType === "audio" ? (
-                  <audio controls src={message.file} className="mb-2 w-40 sm:w-48" />
-                ) : (
-                  message.file && (
-                    <>
-                      {message.fileName &&
-                      (message.fileName.endsWith(".png") ||
-                        message.fileName.endsWith(".jpg") ||
-                        message.fileName.endsWith(".jpeg") ||
-                        message.fileName.endsWith(".gif")) ? (
-                        <img
-                          src={message.file}
-                          alt="Uploaded file"
-                          className="rounded-lg mb-2 w-40 h-auto"
-                        />
-                      ) : (
-                        <div className="flex flex-col">
-                          <a
-                            href={message.file}
-                            download={message.fileName}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-200 underline break-all"
-                          >
-                            📄 {message.fileName}
-                          </a>
-                        </div>
-                      )}
-                    </>
-                  )
-                )}
-
-                {message.text}
-                <div className="text-xs text-gray-400 mt-1 flex items-center justify-end">
-                  {formatTime(message.timestamp)}
-                </div>
-              </motion.div>
-              <p className="text-xs text-gray-400 mt-1">
-                {formatDate(message.timestamp)}
-              </p>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {/* Typing Indicator */}
-        <AnimatePresence>
-          {isOtherTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 10 }}
-              transition={{ duration: 0.3 }}
-              className="flex items-center space-x-2 text-gray-500 dark:text-gray-400 text-sm"
-            >
-              <div className="flex space-x-1">
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity }}
-                  className="w-2 h-2 bg-indigo-500 rounded-full"
-                />
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity, delay: 0.1 }}
-                  className="w-2 h-2 bg-indigo-500 rounded-full"
-                />
-                <motion.div
-                  animate={{ y: [0, -4, 0] }}
-                  transition={{ duration: 0.5, repeat: Infinity, delay: 0.2 }}
-                  className="w-2 h-2 bg-indigo-500 rounded-full"
-                />
-              </div>
-              <span className="font-medium text-indigo-600 dark:text-indigo-400">
-                {user.name} is typing...
-              </span>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <div className="flex-1 overflow-y-auto p-4">
+        {renderMessages()}
         <div ref={scrollRef} />
       </div>
 
       {/* Input Area */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="p-4 border-t flex flex-row space-x-2 bg-white dark:bg-slate-800 mt-auto justify-center items-center relative"
-      >
-        {showEmojiPicker && (
-          <div className="absolute bottom-20 left-1/12">
-            <EmojiPicker onEmojiClick={handleEmojiClick} theme="light" />
-          </div>
-        )}
-
-        {/* Emoji Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="text-2xl"
-        >
-          <FaSmile />
-        </Button>
-
-        {/* File Upload */}
-        <div className="relative">
-          <input
-            id="file-upload"
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,application/pdf,application/msword,application/zip"
-            onChange={handleFileChange}
-            className="hidden"
-          />
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => fileInputRef.current && fileInputRef.current.click()}
-            className="text-2xl"
-          >
-            <FaPaperclip />
-          </Button>
-        </div>
-
-        {/* مكان المعاينة preview فوق التيكست ايريا */}
-        <div className="flex flex-col flex-1 space-y-2">
-          {/* File preview */}
-          {file && (
-            <div className="flex items-center justify-between bg-indigo-100 dark:bg-slate-700 p-2 rounded-lg">
-              <div className="flex-1 break-all text-xs text-gray-800 dark:text-white">
-                📎 {file.name}
-              </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setFile(null)}
-                className="text-red-500 ml-2"
-              >
-                ✖
-              </Button>
-            </div>
-          )}
-
-          {/* Audio preview */}
-          {audioBlob && (
-            <div className=" w-full flex items-center justify-between bg-indigo-100 dark:bg-slate-700 p-2 rounded-lg max-w-[200px]">
-              <audio controls src={URL.createObjectURL(audioBlob)} className="w-full"  style={{ height: "40px" }}/>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setAudioBlob(null)}
-                className="text-red-500 ml-2"
-              >
-                ✖
-              </Button>
-            </div>
-          )}
-
-          {/* Textarea */}
+      <div className="border-t border-gray-200 dark:border-slate-700 p-3">
+        <div className="flex items-center gap-2">
           <Textarea
-            className="resize-none flex-1 max-h-32 overflow-y-auto break-all"
+            placeholder="Type a message..."
             value={input}
             onChange={handleInputChange}
-            placeholder="Type a message..."
             onKeyDown={(e) => {
-              if (e.key === "Enter") {
+              if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 handleSendMessage();
               }
             }}
+            className="flex-1 resize-none min-h-[40px] max-h-[120px] p-2 bg-gray-100 dark:bg-slate-700 border-0 focus:ring-1 focus:ring-indigo-600"
           />
-        </div>
-
-        {/* Voice Record Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={isRecording ? stopRecording : startRecording}
-          className={`text-2xl ${isRecording ? "text-red-500" : ""}`}
-        >
-          {isRecording ? <FaStop /> : <FaMicrophone />}
-        </Button>
-
-        {/* Send Button */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
           <Button
-            variant="send"
             onClick={handleSendMessage}
-            className="px-6 py-2 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center gap-2"
+            disabled={!input.trim()}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white disabled:bg-indigo-400"
           >
-            <span>Send</span>
-            <motion.svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              initial={{ x: 0 }}
-              animate={{ x: [0, 5, 0] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <line x1="22" y1="2" x2="11" y2="13"></line>
-              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-            </motion.svg>
+            Send
           </Button>
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </motion.div>
   );
 };

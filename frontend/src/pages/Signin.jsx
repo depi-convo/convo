@@ -114,51 +114,32 @@ const Signin = ({ onLogin, darkMode, toggleDarkMode }) => {
     }
 
     try {
-      // Try to use the loginUser API function first
-      try {
-        const response = await loginUser({ email, password });
-        // If API call succeeds, use the response data
-        const userData = {
-          id: response._id || 1,
-          username: response.fullName || email.split('@')[0],
-          email: response.email,
-          profileImage: response.profilePic || "https://randomuser.me/api/portraits/women/44.jpg",
-        };
-        
-        onLogin(userData);
-        navigate("/", { state: { user: userData } });
-        return;
-      } catch (apiError) {
-        console.log("API login failed, using fallback:", apiError);
-        // If API fails, continue with the fallback approach
+      const response = await loginUser({ email, password });
+      
+      // Ensure we have a token
+      if (!response.token) {
+        throw new Error("No authentication token received");
       }
       
-      // Fallback approach if API fails
-      const existingUserData = localStorage.getItem("user");
-      let userData;
+      // Store token in localStorage
+      localStorage.setItem('token', response.token);
       
-      if (existingUserData) {
-        const existingUser = JSON.parse(existingUserData);
-        // If we have existing data, use it but update with current login info
-        userData = {
-          ...existingUser,
-          email: email,
-          isLoggedOut: false, // Mark as logged in
-        };
-      } else {
-        // Create new user data
-        userData = {
-          id: 1,
-          username: email.split('@')[0], // Extract username from email
-          email: email,
-          profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
-        };
-      }
-
+      // Create user data object
+      const userData = {
+        id: response.id,
+        username: response.username || email.split('@')[0],
+        email: response.email,
+        profileImage: response.profileImage || "https://randomuser.me/api/portraits/women/44.jpg",
+      };
+      
+      // Update app state
       onLogin(userData);
+      
+      // Navigate to home page
       navigate("/", { state: { user: userData } });
     } catch (err) {
-      setError(err.message || "Login failed");
+      console.error("Login error:", err);
+      setError(err.response?.data?.message || err.message || "Login failed");
     } finally {
       setIsLoading(false);
     }

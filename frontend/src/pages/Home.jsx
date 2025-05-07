@@ -1,83 +1,76 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { getUserProfile, getFriends, getConversationMessages, sendMessage } from "../api";
+import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import ChatList from "../components/chat-list";
 import Chatbox from "../components/Chatbox";
 import Welcome from "../components/welcome-screen";
-<<<<<<< HEAD
-import { FaBars, FaMoon, FaSun, FaArrowLeft } from "react-icons/fa";
-=======
 import { FaBars, FaMoon, FaSun } from "react-icons/fa";
->>>>>>> 508afa5 (Channels/searching Backend)
 import MobileNavbar from "../components/mobile-navbar";
 import { motion, AnimatePresence } from "framer-motion";
+import { initSocket, sendDirectMessage, disconnectSocket, getSocket } from "../lib/socket";
 
 const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedChat, setSelectedChat] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activePage, setActivePage] = useState("home");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-  // Sample chat data
-  const [chats, setChats] = useState([
-    {
-      id: 1,
-      name: "Esraa karam",
-      avatar: "https://randomuser.me/api/portraits/women/44.jpg",
-      lastMessage: "Hello",
-      time: "Today, 11:11pm",
-      unread: 0,
-      isOnline: true,
-      messages: [
-        {
-          id: 1,
-          text: "Hello",
-          sender: "them",
-          time: "11:11 PM",
-        },
-      ],
-      isTyping: false,
-    },
-    {
-      id: 2,
-      name: "Medhat Shalaby",
-      avatar: "https://randomuser.me/api/portraits/men/13.jpg",
-      lastMessage: "Hello there",
-      time: "Today, 11:11pm",
-      unread: 2,
-      isOnline: true,
-      messages: [
-        {
-          id: 1,
-          text: "Hello there",
-          sender: "them",
-          time: "11:11 PM",
-        },
-      ],
-      isTyping: false,
-    },
-    {
-      id: 3,
-      name: "Akram Hosny",
-      avatar: "https://randomuser.me/api/portraits/men/44.jpg",
-      lastMessage: "Typing...",
-      time: "Today, 11:11pm",
-      unread: 0,
-      isOnline: true,
-      messages: [
-        {
-          id: 1,
-          text: "Hello",
-          sender: "them",
-          time: "11:11 PM",
-        },
-      ],
-      isTyping: true,
-    },
-  ]);
+  const [chats, setChats] = useState([]);
+  const [loadingChats, setLoadingChats] = useState(true);
+  const [errorChats, setErrorChats] = useState(null);
+  const [socketInstance, setSocketInstance] = useState(null);
+
+  // Initialize socket connection
+  useEffect(() => {
+    const setupSocket = async () => {
+      const socket = await initSocket();
+      setSocketInstance(socket);
+      
+      if (socket) {
+        // Listen for incoming direct messages
+        socket.on('receive-message', (message) => {
+          console.log('Received message via socket:', message);
+          
+          // If the message is from or to the currently selected chat
+          if (selectedChat && 
+             (message.sender === selectedChat.id || message.receiver === selectedChat.id)) {
+            // Refresh messages for the current chat
+            handleChatSelect(selectedChat);
+          }
+          
+          // Update the chat list to show the latest message
+          updateChatWithNewMessage(message);
+        });
+      }
+    };
+    
+    setupSocket();
+    
+    // Cleanup on unmount
+    return () => {
+      disconnectSocket();
+    };
+  }, []);
+  
+  // Update socket listeners when selected chat changes
+  useEffect(() => {
+    const updateSocketRoom = async () => {
+      if (selectedChat) {
+        const socket = await getSocket();
+        if (socket) {
+          // Join the room for the selected chat to receive messages
+          socket.emit('join');
+        }
+      }
+    };
+    
+    updateSocketRoom();
+  }, [selectedChat]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -88,69 +81,129 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const handleChatSelect = (chat) => {
-    // Mark unread messages as read
-    const updatedChats = chats.map((c) => {
-      if (c.id === chat.id) {
-        return { ...c, unread: 0 };
+  useEffect(() => {
+    // Fetch friends list and format as chats
+    const fetchChats = async () => {
+      setLoadingChats(true);
+      setErrorChats(null);
+      try {
+        // Get current user profile
+        const userProfile = await getUserProfile();
+        console.log('Fetched user profile:', userProfile);
+        
+        // Get friends list
+        const friendsList = await getFriends();
+        console.log('Fetched friends list:', friendsList);
+        
+        // Format friends as chats
+        const formattedChats = friendsList.map(friend => ({
+          id: friend._id,
+          name: friend.fullName,
+          avatar: friend.profilePic,
+          lastMessage: "Start chatting...",
+          time: "",
+          isOnline: false,
+          unread: 0
+        }));
+        
+        setChats(formattedChats);
+      } catch (err) {
+        console.error("Failed to load chats:", err);
+        setErrorChats("Failed to load chats");
+      } finally {
+        setLoadingChats(false);
       }
-      return c;
-    });
+    };
+    fetchChats();
+  }, []);
 
-    setChats(updatedChats);
+  // Check if we have a selectedFriend from navigation
+  useEffect(() => {
+    if (location.state?.selectedFriend) {
+      setSelectedChat(location.state.selectedFriend);
+      // Clear the location state to avoid persisting the selection
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Update a chat in the list with a new message
+  const updateChatWithNewMessage = (message) => {
+    setChats(prevChats => {
+      const updatedChats = [...prevChats];
+      
+      // Find the chat that this message belongs to
+      const chatIndex = updatedChats.findIndex(chat => 
+        chat.id === message.sender || chat.id === message.receiver
+      );
+      
+      if (chatIndex !== -1) {
+        // Update the last message for this chat
+        updatedChats[chatIndex] = {
+          ...updatedChats[chatIndex],
+          lastMessage: message.content,
+          time: new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          // Increment unread count if this is not the selected chat
+          unread: selectedChat && selectedChat.id === updatedChats[chatIndex].id 
+            ? 0 
+            : updatedChats[chatIndex].unread + 1
+        };
+        
+        // Move this chat to the top of the list
+        const updatedChat = updatedChats.splice(chatIndex, 1)[0];
+        updatedChats.unshift(updatedChat);
+      }
+      
+      return updatedChats;
+    });
+  };
+
+  const handleChatSelect = async (chat) => {
+    console.log("Selected chat:", chat);
+    
+    // Reset unread count when selecting a chat
+    setChats(prevChats => 
+      prevChats.map(c => 
+        c.id === chat.id ? { ...c, unread: 0 } : c
+      )
+    );
+    
     setSelectedChat(chat);
   };
 
-  const handleSendMessage = (chatId, message) => {
-    const newMessage = {
-      id: Date.now(),
-      text: message,
-      sender: "me",
-      time: "11:12 PM",
-    };
-
-    const updatedChats = chats.map((chat) => {
-      if (chat.id === chatId) {
-        // Add message
-        const updatedChat = {
-          ...chat,
-          messages: [...chat.messages, newMessage],
-          lastMessage: message,
-          time: "Just now",
-          isTyping: true,
-        };
-
-        // Simulate response after 2 seconds
-        setTimeout(() => {
-          setChats((prevChats) => {
-            return prevChats.map((c) => {
-              if (c.id === chatId) {
-                const responseMessage = {
-                  id: Date.now(),
-                  text: "How are you doing today?",
-                  sender: "them",
-                  time: "11:12 PM",
-                };
-
-                return {
-                  ...c,
-                  messages: [...c.messages, responseMessage],
-                  lastMessage: responseMessage.text,
-                  time: "Just now",
-                  isTyping: false,
-                };
-              }
-              return c;
-            });
-          });
-        }, 1000);
-
-        return updatedChat;
+  const handleSendMessage = async (chatId, message) => {
+    if (!message.trim()) return;
+    
+    try {
+      console.log("Sending message to:", chatId, message);
+      
+      // Try to send via socket first
+      try {
+        const socketResponse = await sendDirectMessage(chatId, message);
+        console.log("Message sent via socket:", socketResponse);
+        
+        // Add the new message to the chat
+        if (socketResponse && socketResponse.data) {
+          updateChatWithNewMessage(socketResponse.data);
+        }
+      } catch (socketErr) {
+        console.warn("Failed to send via socket, falling back to REST API:", socketErr);
+        // Fallback to REST API
+        const response = await sendMessage(chatId, message);
+        console.log("Message sent via REST API:", response);
+        
+        // Refresh the selected chat to show new message
+        if (response && response.data) {
+          updateChatWithNewMessage(response.data);
+        }
       }
-      return chat;
-    });
-
-    setChats(updatedChats);
+      
+      // No need to refresh the whole conversation as we're handling
+      // the messages in real-time via the socket or by updating the state
+      
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      setErrorChats("Failed to send message");
+    }
   };
 
   const toggleMobileMenu = () => {
@@ -171,10 +224,27 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
       case "groups":
         navigate("/groups");
         break;
+      case "friends":
+        navigate("/friends");
+        break;
       default:
         navigate("/");
     }
   };
+
+  if (loadingChats) return (
+    <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="animate-spin h-12 w-12 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+    </div>
+  );
+  
+  if (errorChats) return (
+    <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="p-4 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 rounded-lg">
+        {errorChats}
+      </div>
+    </div>
+  );
 
   return (
     <div className="flex flex-col bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen overflow-hidden">
@@ -300,10 +370,6 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.3 }}
           className="hidden md:block md:w-20 flex-shrink-0 bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
         >
-<<<<<<< HEAD
-          
-=======
->>>>>>> 508afa5 (Channels/searching Backend)
           <Sidebar
             activePage={activePage}
             setActivePage={handleNavigation}
@@ -350,6 +416,7 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                     onSendMessage={handleSendMessage}
                     user={user}
                     isMobile={isMobile}
+                    socketInstance={socketInstance}
                   />
                 ) : (
                   <Welcome user={user} />

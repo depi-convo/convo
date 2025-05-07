@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
 
 const Welcome = ({ user }) => {
-  const displayName = user?.name ?? "there";
+  const displayName =
+    user?.username?.split(" ")[0] || user?.fullName?.split(" ")[0] || "there";
 
   return (
     <motion.div

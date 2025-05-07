@@ -4,6 +4,7 @@ import { FaBars, FaMoon, FaSun } from 'react-icons/fa';
 import Sidebar from '../components/sidebar';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
+import { updateUserProfile } from '../api';
 
 const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode, toggleDarkMode }) => {
   const location = useLocation();
@@ -21,13 +22,15 @@ const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode,
   const [preview, setPreview] = useState(initialUser?.profileImage || '');
   const [activePage, setActivePage] = useState("profile");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Update form when propUser changes
   useEffect(() => {
     if (propUser) {
-      setName(propUser.username || "");
+      setName(propUser.fullName || propUser.username || "");
       setEmail(propUser.email || "");
-      setPreview(propUser.profileImage || '');
+      setPreview(propUser.profilePic || propUser.profileImage || '');
     }
   }, [propUser]);
 
@@ -50,27 +53,23 @@ const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode,
     console.log('Toggle Mobile Menu');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Create updated user object
-    const updatedUser = {
-      ...initialUser,
-      username: name,
-      email: email,
-      profileImage: picture ? preview : initialUser.profileImage || '',
-    };
-   
-    // Save updated user to localStorage
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    
-    // Update the user in the parent component if setUser is provided
-    if (setPropUser) {
+    setLoading(true);
+    setError(null);
+    try {
+      const updatedUser = await updateUserProfile({
+        fullName: name,
+        email: email,
+        profilePic: picture ? preview : initialUser.profileImage || '',
+      });
       setPropUser(updatedUser);
+      navigate('/profile');
+    } catch (err) {
+      setError('Failed to update profile');
+    } finally {
+      setLoading(false);
     }
-
-    // Navigate back to profile page
-    navigate("/profile");
   };
 
   const handleClose = () => {
