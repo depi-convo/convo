@@ -7,7 +7,10 @@ import {
 
 export function setupSocketServer(server) {
   const io = new SocketIOServer(server, {
-    cors: { origin: "*" },
+    cors: { 
+      origin: "http://localhost:5173",
+      credentials: true
+    },
   });
 
   // Apply authentication middleware

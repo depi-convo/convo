@@ -30,7 +30,7 @@ export async function handleDirectMessage(
     const message = new Message({ sender, receiver, content });
     await message.save();
 
-    io.to(receiver).to(sender).emit("receive-message", message);
+    io.to([receiver, sender]).emit("receive-message", message);
     callback?.({ success: true, message });
   } catch (err) {
     callback?.({ error: "Failed to send message" });

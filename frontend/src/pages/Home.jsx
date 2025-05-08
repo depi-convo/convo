@@ -170,39 +170,10 @@ const Home = ({ user, onLogout, darkMode, toggleDarkMode }) => {
     setSelectedChat(chat);
   };
 
-  const handleSendMessage = async (chatId, message) => {
-    if (!message.trim()) return;
-    
-    try {
-      console.log("Sending message to:", chatId, message);
-      
-      // Try to send via socket first
-      try {
-        const socketResponse = await sendDirectMessage(chatId, message);
-        console.log("Message sent via socket:", socketResponse);
-        
-        // Add the new message to the chat
-        if (socketResponse && socketResponse.data) {
-          updateChatWithNewMessage(socketResponse.data);
-        }
-      } catch (socketErr) {
-        console.warn("Failed to send via socket, falling back to REST API:", socketErr);
-        // Fallback to REST API
-        const response = await sendMessage(chatId, message);
-        console.log("Message sent via REST API:", response);
-        
-        // Refresh the selected chat to show new message
-        if (response && response.data) {
-          updateChatWithNewMessage(response.data);
-        }
-      }
-      
-      // No need to refresh the whole conversation as we're handling
-      // the messages in real-time via the socket or by updating the state
-      
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      setErrorChats("Failed to send message");
+  const handleSendMessage = (chatId, messageObj) => {
+    // Only update the chat list if a message object is provided (from Chatbox after successful send)
+    if (messageObj && messageObj.content) {
+      updateChatWithNewMessage(messageObj);
     }
   };
 
