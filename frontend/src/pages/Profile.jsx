@@ -1,13 +1,22 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaBars, FaMoon, FaSun, FaUser, FaEnvelope, FaCamera, FaSignOutAlt, FaArrowLeft } from "react-icons/fa";
+import {
+  FaBars,
+  FaMoon,
+  FaSun,
+  FaUser,
+  FaEnvelope,
+  FaCamera,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import Sidebar from "../components/sidebar";
 import Header from "../components/Header";
 import MobileNavbar from "../components/mobile-navbar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { getUserProfile, updateUserProfile } from "../api";
 
 const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   const location = useLocation();
@@ -32,28 +41,19 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   useEffect(() => {
     const loadUserData = async () => {
       try {
-        // Try to get user data from localStorage first
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          setUser(userData);
-          setFormData({
-            fullName: userData.username,
-            email: userData.email,
-            profilePic: userData.profileImage,
-          });
-          setImageSrc(userData.profileImage);
-        } else if (propUser) {
-          setUser(propUser);
-          setFormData({
-            fullName: propUser.username,
-            email: propUser.email,
-            profilePic: propUser.profileImage,
-          });
-          setImageSrc(propUser.profileImage);
-        } else {
-          navigate("/signin");
-        }
+        const userData = await getUserProfile();
+        // The userData might be coming directly from the backend with different field names
+        setUser({
+          ...userData,
+          username: userData.username || userData.fullName, // Handle both field names
+          profileImage: userData.profileImage || userData.profilePic, // Handle both field names
+        });
+        setFormData({
+          fullName: userData.username || userData.fullName || "",
+          email: userData.email || "",
+          profilePic: userData.profileImage || userData.profilePic || "",
+        });
+        setImageSrc(userData.profileImage || userData.profilePic);
       } catch (err) {
         console.error("Error loading user data:", err);
         navigate("/signin");
@@ -94,15 +94,12 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
     setIsSaving(true);
 
     try {
-      // Update user data in localStorage
-      const updatedUser = {
-        ...user,
-        username: formData.fullName,
+      const updatedUser = await updateUserProfile({
+        fullName: formData.fullName,
         email: formData.email,
-        profileImage: formData.profilePic,
-      };
+        profilePic: formData.profilePic,
+      });
       setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
       setSuccess("Profile updated successfully!");
     } catch (err) {
       setError(err.message || "Failed to update profile");
@@ -112,18 +109,24 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("user");
+    localStorage.removeItem("token");
     onLogout();
     navigate("/signin");
   };
 
-  const handleDeletePhoto = () => {
+  const handleDeletePhoto = async () => {
     if (window.confirm("Are you sure you want to delete your profile photo?")) {
-      const updated = { ...user, profileImage: null };
-      localStorage.setItem("user", JSON.stringify(updated));
-      setUser(updated);
-      setImageSrc(null);
-      setFormData(prev => ({ ...prev, profilePic: null }));
+      try {
+        const updatedUser = await updateUserProfile({
+          ...user,
+          profilePic: null,
+        });
+        setUser(updatedUser);
+        setImageSrc(null);
+        setFormData((prev) => ({ ...prev, profilePic: null }));
+      } catch (err) {
+        setError("Failed to delete profile photo");
+      }
     }
   };
 
@@ -132,10 +135,10 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
     input.type = "file";
     input.accept = "image/*";
     input.style.display = "none";
-    
+
     document.body.appendChild(input);
     input.click();
-    
+
     input.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
@@ -145,11 +148,11 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
           localStorage.setItem("user", JSON.stringify(updated));
           setUser(updated);
           setImageSrc(e.target.result);
-          setFormData(prev => ({ ...prev, profilePic: e.target.result }));
+          setFormData((prev) => ({ ...prev, profilePic: e.target.result }));
         };
         reader.readAsDataURL(file);
       }
-      
+
       document.body.removeChild(input);
     };
   };
@@ -159,15 +162,15 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
   };
 
   const handleEditClick = () => {
-    navigate("/edit-profile", { 
-      state: { 
+    navigate("/edit-profile", {
+      state: {
         localUser: {
           ...user,
           email: user.email || "",
           username: user.username || "",
-          profileImage: user.profileImage || null
-        } 
-      } 
+          profileImage: user.profileImage || null,
+        },
+      },
     });
   };
 
@@ -199,7 +202,10 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
       <header className="bg-white dark:bg-slate-800 shadow-md z-10 animate-fade-in">
         <div className="flex justify-between items-center pr-4 pl-4 pt-2 pb-2">
           {isMobile ? (
-            <button onClick={toggleMobileMenu} className="p-2 rounded-full mr-2">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-full mr-2"
+            >
               <FaBars className="text-gray-600 dark:text-gray-300" />
             </button>
           ) : null}
@@ -304,22 +310,14 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
             className="flex-1 overflow-y-auto p-4 md:p-8"
           >
             <div className="max-w-4xl mx-auto">
-              <div className="flex items-center mb-6">
-                <button 
-                  onClick={() => navigate("/home")}
-                  className="p-2 rounded-full mr-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <FaArrowLeft className="text-gray-600 dark:text-gray-300" />
-                </button>
-                <motion.h1
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: 0.1 }}
-                  className="text-2xl font-bold text-gray-800 dark:text-white"
-                >
-                  Profile
-                </motion.h1>
-              </div>
+              <motion.h1
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.1 }}
+                className="text-2xl font-bold mb-6 text-gray-800 dark:text-white"
+              >
+                Profile
+              </motion.h1>
 
               {isLoading ? (
                 <motion.div
@@ -335,9 +333,15 @@ const Profile = ({ user: propUser, onLogout, darkMode, toggleDarkMode }) => {
                   <div className="relative w-36 h-36 sm:w-40 sm:h-40 rounded-full mx-auto mb-6">
                     <div className="w-full h-full rounded-full bg-indigo-100 text-indigo-800 flex items-center justify-center border-4 border-indigo-700 shadow-lg overflow-hidden">
                       {imageSrc ? (
-                        <img src={imageSrc} alt="Profile" className="w-full h-full object-cover" />
+                        <img
+                          src={imageSrc}
+                          alt="Profile"
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
-                        <span className="text-4xl font-bold">{user?.username?.charAt(0)?.toUpperCase()}</span>
+                        <span className="text-4xl font-bold">
+                          {user?.username?.charAt(0)?.toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <button

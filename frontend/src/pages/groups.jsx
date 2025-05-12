@@ -1,39 +1,25 @@
-import { useState,useEffect  } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/sidebar";
 import { FaPlus } from "react-icons/fa";
-import MobileNavbar from "../components/mobile-navbar"
-import { FaBars, FaMoon, FaSun } from "react-icons/fa"
+import { getGroups, joinGroup, leaveGroup } from "../api";
+import MobileNavbar from "../components/mobile-navbar";
+import { FaBars, FaMoon, FaSun } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
   const navigate = useNavigate();
   const [activePage, setActivePage] = useState("groups");
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [channels, setChannels] = useState([
-    {
-      id: 1,
-      name: "Tech Talks",
-      description: "Latest updates in technology",
-      image: "https://placehold.co/80x80",
-      joined: false,
-    },
-    {
-      id: 2,
-      name: "Gaming Arena",
-      description: "All about games and streams",
-      image: "https://placehold.co/80x80",
-      joined: true,
-    },
-    {
-      id: 3,
-      name: "Fitness Vibes",
-      description: "Health, workouts & motivation",
-      image: "https://placehold.co/80x80",
-      joined: false,
-    },
-  ]);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [channels, setChannels] = useState([]);
+  const [loadingGroups, setLoadingGroups] = useState(true);
+  const [errorGroups, setErrorGroups] = useState(null);
+
+  useEffect(() => {
+    fetchGroups();
+    // eslint-disable-next-line
+  }, []);
 
   const [showForm, setShowForm] = useState(false);
   const [newChannel, setNewChannel] = useState({
@@ -42,71 +28,91 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
     image: "https://placehold.co/80x80",
   });
 
-  const handleJoinLeave = (id) => {
-    setChannels((prev) =>
-      prev.map((channel) =>
-        channel.id === id ? { ...channel, joined: !channel.joined } : channel
-      )
-    );
+  const handleJoinLeave = async (id, joined) => {
+    try {
+      if (joined) {
+        await leaveGroup(id);
+      } else {
+        await joinGroup(id);
+      }
+      await fetchGroups();
+    } catch (err) {
+      setErrorGroups("Failed to update group membership");
+    }
   };
+
+  // Fetch groups from API
+  const fetchGroups = async () => {
+    setLoadingGroups(true);
+    setErrorGroups(null);
+    try {
+      const groups = await getGroups();
+      setChannels(groups);
+    } catch (err) {
+      setErrorGroups("Failed to load groups");
+    } finally {
+      setLoadingGroups(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchGroups();
+  }, []);
 
   const handleChannelClick = (id) => {
     navigate(`/channels/${id}`);
   };
 
- 
-   useEffect(() => {
-     const handleResize = () => {
-       setIsMobile(window.innerWidth < 768)
-     }
- 
-     window.addEventListener("resize", handleResize)
-     return () => window.removeEventListener("resize", handleResize)
-   }, [])
-   const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
- 
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
   const handleNavigation = (page) => {
-    setActivePage(page)
-    setIsMobileMenuOpen(false)
+    setActivePage(page);
+    setIsMobileMenuOpen(false);
 
     switch (page) {
       case "home":
-        navigate("/home")
-        break
+        navigate("/home");
+        break;
       case "profile":
-        navigate("/profile")
-        break
+        navigate("/profile");
+        break;
       case "groups":
-        navigate("/")
-        break
+        navigate("/");
+        break;
       default:
-        navigate("/")
+        navigate("/");
     }
-  }
-
-  const handleAddChannel = () => {
-    if (!newChannel.name.trim()) return;
-
-    const id = channels.length + 1;
-    setChannels([
-      ...channels,
-      {
-        id,
-        ...newChannel,
-        joined: false,
-      },
-    ]);
-    setNewChannel({ name: "", description: "", image: "https://placehold.co/80x80" });
-    setShowForm(false);
   };
-  
+
+  const handleAddChannel = async () => {
+    if (!newChannel.name.trim()) return;
+    try {
+      // Optionally, call an API to create a new group/channel here
+      // await createGroup(newChannel);
+      setShowForm(false);
+      fetchGroups();
+    } catch (err) {
+      setErrorGroups("Failed to create channel");
+    }
+  };
+
+  if (loadingGroups) return <div>Loading groups...</div>;
+  if (errorGroups) return <div>{errorGroups}</div>;
 
   return (
-    <div className="flex flex-col  bg-gray-50 dark:bg-slate-900 transition-colors duration-300 h-screen w-screen">
-     <motion.header
+    <div className="flex flex-col h-screen w-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300 overflow-hidden">
+      {/* Header */}
+      <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
@@ -114,15 +120,22 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
       >
         <div className="flex justify-between items-center  pr-4 pl-4 pt-2 pb-2">
           {isMobile ? (
-            <button onClick={toggleMobileMenu} className="p-2 rounded-full mr-2">
+            <button
+              onClick={toggleMobileMenu}
+              className="p-2 rounded-full mr-2"
+            >
               <FaBars className="text-gray-600 dark:text-gray-300" />
             </button>
           ) : null}
-          
+
           <div className="flex items-center">
-          <img src="https://img.icons8.com/?size=100&id=hCvhdugyicF1&format=png&color=000000" width={"50px"}  height={"10px"} alt="logo" ></img>
- 
-  
+            <img
+              src="https://img.icons8.com/?size=100&id=hCvhdugyicF1&format=png&color=000000"
+              width={"50px"}
+              height={"10px"}
+              alt="logo"
+            ></img>
+
             <h1 className="text-2xl font-bold ml-2 text-black dark:text-gray-50 font-englebert">
               Convo
             </h1>
@@ -157,7 +170,7 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                 />
               </div>
             </div>
-  
+
             <div
               className="absolute inset-0 flex items-center justify-center"
               style={{
@@ -177,7 +190,7 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                 />
               </div>
             </div>
-  
+
             <div
               className="absolute inset-0 bg-gradient-to-br"
               style={{
@@ -190,7 +203,7 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           </button>
         </div>
       </motion.header>
-      
+
       {/* Mobile Navigation Menu */}
       <AnimatePresence>
         {isMobile && isMobileMenuOpen && (
@@ -201,11 +214,16 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             transition={{ duration: 0.3 }}
             className="bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 shadow-md z-10"
           >
-            <MobileNavbar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout}></MobileNavbar>
+            <MobileNavbar
+              activePage={activePage}
+              setActivePage={handleNavigation}
+              user={user}
+              onLogout={onLogout}
+            ></MobileNavbar>
           </motion.div>
         )}
       </AnimatePresence>
-     
+
       {/* Main Content */}
 
       <div className="flex flex-1  ">
@@ -216,10 +234,13 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
           transition={{ duration: 0.3 }}
           className="hidden md:block md: w-20 flex-shrink-0  bg-indigo-800 rounded-2xl dark:bg-indigo-800 m-1 border-r border-gray-200 dark:border-slate-700"
         >
-          <Sidebar activePage={activePage} setActivePage={handleNavigation} user={user} onLogout={onLogout} />
+          <Sidebar
+            activePage={activePage}
+            setActivePage={handleNavigation}
+            user={user}
+            onLogout={onLogout}
+          />
         </motion.div>
-
-
 
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -233,23 +254,15 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
             transition={{ duration: 0.3, delay: 0.1 }}
             className="flex justify-between items-center mb-6"
           >
-            <div className="flex items-center">
-              <button 
-                onClick={() => navigate("/home")}
-                className="p-2 rounded-full mr-2 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-              >
-                <FaArrowLeft className="text-gray-600 dark:text-gray-300" />
-              </button>
-              <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-                Channels
-              </h1>
-            </div>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              Channels
+            </h1>
             <div className="flex gap-4">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setShowForm(!showForm)}
-                className="flex items-center gap-2 bg-indigo-700 hover:bg-indigo-800 text-white font-semibold px-4 py-2 rounded-full shadow"
+                className="flex items-center gap-2 bg-indigo-700  hover:bg-indigo-800  text-white font-semibold px-4 py-2 rounded-full shadow"
               >
                 <FaPlus /> Create Channel
               </motion.button>
@@ -281,7 +294,10 @@ const Groups = ({ user, onLogout, darkMode, toggleDarkMode }) => {
                   className="w-full p-2 border rounded"
                   value={newChannel.description}
                   onChange={(e) =>
-                    setNewChannel({ ...newChannel, description: e.target.value })
+                    setNewChannel({
+                      ...newChannel,
+                      description: e.target.value,
+                    })
                   }
                 />
                 <button

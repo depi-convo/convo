@@ -126,40 +126,29 @@ const Signup = ({ onLogin, darkMode, toggleDarkMode }) => {
     }
 
     try {
-      // Try to use the signupUser API function first
-      try {
         const response = await signupUser({ fullName: name, email, password })
+      
+      // Ensure we have a token
+      if (!response.token) {
+        throw new Error("No authentication token received")
+      }
+      
+      // Create user data object
         const userData = {
-          id: response._id || 1,
-          username: response.fullName || name,
-          email: response.email,
-          profileImage: response.profilePic || "https://randomuser.me/api/portraits/women/44.jpg",
-        }
-        
-        onLogin(userData)
-        setIsLoading(false)
-        navigate("/", { state: { user: userData } })
-      } catch (apiError) {
-        console.log("API signup failed, using fallback:", apiError)
-        // Fallback approach
-        const userData = {
-          id: 1,
-          username: name,
-          email: email,
-          profileImage: "https://randomuser.me/api/portraits/women/44.jpg",
+        id: response.id,
+        username: response.username || name,
+        email: response.email,
+        profileImage: response.profileImage || "https://randomuser.me/api/portraits/women/44.jpg",
         }
   
-        localStorage.setItem("user", JSON.stringify(userData))
-        setIsLoading(false)
-        navigate("/signin", { 
-          state: { 
-            email: email,
-            password: password
-          } 
-        })
-      }
+      // Update app state
+      onLogin(userData)
+      
+      // Navigate to home page
+      navigate("/", { state: { user: userData } })
     } catch (err) {
-      setError(err.message || "Signup failed")
+      console.error("Signup error:", err)
+      setError(err.response?.data?.message || err.message || "Signup failed")
       setIsLoading(false)
     }
   }

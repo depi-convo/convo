@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { FaHome, FaUser, FaUsers, FaSignOutAlt } from "react-icons/fa";
+import { FaHome, FaUser, FaUsers, FaSignOutAlt, FaUserFriends } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 
@@ -7,10 +7,12 @@ const iconMap = {
   Home: <FaHome size="20" />,
   Profile: <FaUser size="20" />,
   Groups: <FaUsers size="20" />,
+  Friends: <FaUserFriends size="20" />,
 };
 
 const links = [
   { name: "Home", path: "/" },
+  { name: "Friends", path: "/friends" },
   { name: "Profile", path: "/profile" },
   { name: "Groups", path: "/groups" },
 ];

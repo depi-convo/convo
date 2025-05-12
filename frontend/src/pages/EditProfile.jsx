@@ -1,37 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { FaBars, FaMoon, FaSun } from 'react-icons/fa';
-import Sidebar from '../components/sidebar';
-import { Label } from '../components/ui/label';
-import { Input } from '../components/ui/input';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { FaBars, FaMoon, FaSun } from "react-icons/fa";
+import Sidebar from "../components/sidebar";
+import { Label } from "../components/ui/label";
+import { Input } from "../components/ui/input";
+import { updateUserProfile } from "../api";
 
-const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode, toggleDarkMode }) => {
+const EditProfile = ({
+  user: propUser,
+  setUser: setPropUser,
+  onLogout,
+  darkMode,
+  toggleDarkMode,
+}) => {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Get user data from props, location state, or localStorage
-  const initialUser = propUser || location.state?.localUser || JSON.parse(localStorage.getItem('user')) || {};
-  
+  const initialUser =
+    propUser ||
+    location.state?.localUser ||
+    JSON.parse(localStorage.getItem("user")) ||
+    {};
+
   // Log the user data to debug
   console.log("Initial user data:", initialUser);
-  
+
   const [name, setName] = useState(initialUser.username || "");
   const [email, setEmail] = useState(initialUser.email || "");
   const [picture, setPicture] = useState(null);
-  const [preview, setPreview] = useState(initialUser?.profileImage || '');
+  const [preview, setPreview] = useState(initialUser?.profileImage || "");
   const [activePage, setActivePage] = useState("profile");
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Update form when propUser changes
   useEffect(() => {
     if (propUser) {
-      setName(propUser.username || "");
+      setName(propUser.fullName || propUser.username || "");
       setEmail(propUser.email || "");
-      setPreview(propUser.profileImage || '');
+      setPreview(propUser.profilePic || propUser.profileImage || "");
     }
   }, [propUser]);
 
@@ -40,86 +49,41 @@ const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode,
     if (location.state?.localUser) {
       setName(location.state.localUser.username || "");
       setEmail(location.state.localUser.email || "");
-      setPreview(location.state.localUser.profileImage || '');
+      setPreview(location.state.localUser.profileImage || "");
     }
   }, [location.state]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleMobileMenu = () => {
-    console.log('Toggle Mobile Menu');
+    console.log("Toggle Mobile Menu");
   };
 
-  // In your handleSubmit function, update the axios call to use the correct endpoint
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setSuccess('');
-    
-    // Create updated user object
-    const updatedUser = {
-      ...initialUser,
-      username: name,
-      email: email,
-      profileImage: picture ? preview : initialUser.profileImage || '',
-    };
-    
+    setLoading(true);
+    setError(null);
     try {
-      // Send updated profile to backend using the existing endpoint
-      const response = await axios.put(
-        'http://localhost:5000/api/auth/update-profile', 
-        {
-          username: name,
-          email: email,
-          profileImage: preview
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        }
-      );
-      
-      // If successful, update local storage and state
-      if (response.data) {
-        // Update local storage
-        localStorage.setItem('user', JSON.stringify({
-          ...initialUser,
-          ...response.data
-        }));
-        
-        // Update the user in the parent component if setUser is provided
-        if (setPropUser) {
-          setPropUser({
-            ...initialUser,
-            ...response.data
-          });
-        }
-        
-        setSuccess('Profile updated successfully!');
-        
-        // Navigate back to profile page after a short delay
-        setTimeout(() => {
-          navigate("/profile");
-        }, 1500);
-      }
+      const updatedUser = await updateUserProfile({
+        fullName: name,
+        email: email,
+        profilePic: picture ? preview : initialUser.profileImage || "",
+      });
+      setPropUser(updatedUser);
+      navigate("/profile");
     } catch (err) {
-      console.error('Error updating profile:', err);
-      setError(err.response?.data?.message || 'Failed to update profile. Please try again.');
+      setError("Failed to update profile");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleClose = () => {
-    navigate('/profile');
+    navigate("/profile");
   };
 
   const handleFileChange = (e) => {
@@ -224,14 +188,17 @@ const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode,
               {error}
             </div>
           )}
-          
+
           {success && (
             <div className="mb-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
               {success}
             </div>
           )}
-          
-          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md space-y-6">
+
+          <form
+            onSubmit={handleSubmit}
+            className="max-w-3xl mx-auto bg-white dark:bg-slate-800 p-6 rounded-xl shadow-md space-y-6"
+          >
             {/* Username */}
             <div>
               <label className="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -292,7 +259,7 @@ const EditProfile = ({ user: propUser, setUser: setPropUser, onLogout, darkMode,
                 className="px-6 py-2 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-md transition-all duration-300 ease-in-out"
                 disabled={isLoading}
               >
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading ? "Saving..." : "Save Changes"}
               </button>
               <button
                 type="button"

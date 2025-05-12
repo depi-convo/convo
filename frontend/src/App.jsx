@@ -12,6 +12,7 @@ import Profile from "./pages/Profile";
 import Groups from "./pages/groups";
 import "./index.css";
 import EditProfile from "./pages/EditProfile";
+import Friends from "./pages/Friends";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -77,7 +78,16 @@ function App() {
   };
   // same for logout
   const handleLogout = () => {
-    // Instead of removing the user data completely, just mark as logged out
+    // Remove tokens and cookies
+    localStorage.removeItem('token');
+    
+    // Make a logout request to invalidate the server-side cookie
+    fetch('http://localhost:5000/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include',
+    }).catch(err => console.error('Logout error:', err));
+    
+    // Update user data in localStorage
     const userData = localStorage.getItem("user");
     if (userData) {
       const user = JSON.parse(userData);
@@ -85,6 +95,7 @@ function App() {
       localStorage.setItem("user", JSON.stringify({...user, isLoggedOut: true}));
     }
     
+    // Update app state
     setCurrentUser(null);
     setIsAuthenticated(false);
   };
@@ -182,6 +193,18 @@ function App() {
               ) : (
                 <Navigate to="/signin" />
               )
+            }
+          />
+
+          <Route
+            path="/friends"
+            element={
+              <Friends
+                user={currentUser}
+                onLogout={handleLogout}
+                darkMode={darkMode}
+                toggleDarkMode={toggleDarkMode}
+              />
             }
           />
 

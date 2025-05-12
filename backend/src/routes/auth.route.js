@@ -11,7 +11,8 @@ import {
   unblockUser,
   getFriends,
   getBlocked,
-  getUserByName
+  getUserByName,
+  searchUsers,
 } from "../controllers/auth.controller.js";
 import { protectRoute } from "../middleware/auth.middleware.js";
 
@@ -32,6 +33,7 @@ router.post("/block-user", protectRoute, blockUser);
 router.post("/unblock-user", protectRoute, unblockUser);
 router.get("/friends", protectRoute, getFriends);
 router.get("/blocked", protectRoute, getBlocked);
+router.get("/search", protectRoute, searchUsers);
 router.get("/:userName/get-user", protectRoute, getUserByName);
 
 export default router;
